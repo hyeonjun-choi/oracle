@@ -326,6 +326,7 @@ foreign key(FK) <중요, 핵심>
 ▶[고유 일련 번호]를 생성해서 제공하는 객체. 일종의 [일련 번호 생성기] 이다.
 ▶주로 하나의 테이블에서 PRIMARY KEY 로 지정된 컬럼명에 입력될 [일련 번호] 값을 생성한다.
 ▶(비유)은행에서 번호표 뽑는 기계와 동일한 기능을 가짐.
+▶<주의> 개발 과정 도중 중간에 잘못 입력된 데이터로 인한 오류 발생 시 오류 발생으로 인한 번호 누락이 발생됨.
 
 ▶시퀀스 생성 SQL 구문
 
@@ -383,6 +384,172 @@ create sequence sq_emp
 	7. 연봉등급을 관리하고 싶다.
 	8. 관리하고 싶은 연봉 정보는 연봉등급, 등급별 최소연봉, 등급별 최대연봉
 
+SQL_02.sql 참조
+
+
+<15 ~ 25>(기)
+<15> employee 테이블에서 모든 컬럼, 모든 행의 데이터를 검색하면?
+
+-----------------------------------------------------------------------------------------------------------------------------
+select emp_no, emp_name, dep_no, jikup, salary, hire_date, jumin_num, phone_num, mgr_emp_no from employee;
+-----------------------------------------------------------------------------------------------------------------------------
+select * from employee;  (* 사용시 create 구문 그대로 나옴)
+-----------------------------------------------------------------------------------------------------------------------------
+select 
+	emp_no
+	, emp_name
+	, dep_no
+	, jikup
+	, salary
+	, hire_date
+	, jumin_num
+	, phone_num
+	, mgr_emp_no 
+from 
+	employee;
+
+
+
+<16> employee 테이블에서 emp_no, emp_name, jikup, salary, hire_date 컬럼 데이터 검색하면?
+
+-----------------------------------------------------------------------------------------------------------------------------
+select emp_no, emp_name, jikup, salary, hire_date from employee;
+-----------------------------------------------------------------------------------------------------------------------------
+select 
+	emp_no
+	, emp_name
+	, jikup
+	, salary
+	, hire_date 
+from 
+	employee;
+
+
+<17>  employee 테이블에서 emp_no, emp_name, jikup, salary, hire_date 을 검색하면서 별칭(= alias)을 즉, 헤더를 
+	사원번호, 직원명, 직급, 연봉, 입사일로 하고 연봉에 '만원'이란 문자를 붙여 검색하면?
+
+-----------------------------------------------------------------------------------------------------------------------------
+select emp_no, emp_name, jikup, salary, hire_date from employee;
+-----------------------------------------------------------------------------------------------------------------------------
+ 
+  select
+	emp_no		          직원번호  ------------------  테이블에 들어갈 데이터가 아니므로 더블 코트를 사용
+	, emp_name	          "직원 명"  ------------------ 가능하면 무조건 더블코트 사용
+	, jikup		          "직급"    ------------------ as 생략 가능
+	, salary||'만원'		 "연봉"    ------------------ 별칭에 공백 없을시 더블코드 생략 가능
+	, hire_date 	      "입사일"  ------------------ 오라클에서 연결연산자는 +가 아니라 ||이다. 자바와 다름.
+from
+	employee;
+
+
+<18> employee 테이블에서 직원명, 직급, 연봉, 세금, 실수령액을 검색하면? (세금은 연봉의 12%)
+
+  select
+	emp_name           	as "직원명"
+	, jikup		            as "직급"
+	, salary*0.12||'만원'		as "세금"
+	, salary*0.88||'만원'		as "실수령액"
+from
+	employee;
+
+<19> employee 테이블에서 직급을 중복없이 검색?
+
+select distinct jikup from employee;
+
+select distinct (jikup) from employee;
+
+select unique (jikup) from employee;
+
+<20> employee 테이블에서 부서번호와 직급을 중복없이 검색?
+
+select distinct dep_no, jikup from employee;
+
+<21> employee 테이블에서 연봉이 3000만원 이상인 직원을 검색하면?
+
+select * from employee where salary >= 3000
+                                --- <행을 골라내는 키워드>
+
+<22> employee 테이블에서 연봉 오름차순으로 검색하면?
+
+select * from employee order by salary  asc;
+                                --- 행의 순서를 바꾸고 싶을때
+select * from employee order by salary; ---- asc 생략 가능
+
+select * from employee order by 5 asc;
+
+select * from employee order by 5;
+
+<23>  employee 테이블에서 연봉 내림차순으로 검색하면?
+
+select * from employee order by salary desc; ---- 내림차순. 생략 불가능
+
+select * from employee order by 5 desc;
+
+<24> employee 테이블에서 부서번호 오름차순을 유지하면서 연봉을 내림차순으로 검색
+
+select * from employee order by dep_no asc, salary desc;
+
+select * from employee order by dep_no, salary desc; -- asc생략은 가능하나 전체를 착각하게 만들 가능성 있음
+
+<25> employee 테이블에서 직급이 높은 순서 나열해서 검색하면?
+
+select * from employee order by jikup asc;
+select * from employee order by jikup desc;
+둘 다 잘못된 예시
+직급순서는 인간이 생각하는 기준과 오라클의 정렬기준과 다르기 때문
+추후 조건문을 통해 정렬의 기준을 바꿔야 함
+
+select * from employee order by decode( jikup , '사장' ,1, '부장' ,2, '과장' ,3, '대리' , 4), alary desc;
+<명심> 고객의 요구사항을 보고 select문을 작성하는 것 또한 중요하지만,
+	이미 작성된 select문을 보고 고객의 요구를 알아내는 것 역시 중요함.
+
+<26>employee 테이블에서 부장만 검색?
+
+select * from employee where jikup = '부장'
+
+<27> employee 테이블에서 20번 부서의 과장 검색?
+
+select * from employee where dep_no = 20 and jikup = '과장'
+
+<28> employee 테이블에서 20번 부서 또는 과장 검색?
+
+select * from employee where dep_no = 20 or jikup = '과장'
+
+<29> employee 테이블에서 과장 중에 연봉 3400 이상 검색
+
+select * from employee where jikup = '과장' and salary >= 3400
+
+<30> employee 테이블에서 실수령액 4000만원 이상 받는 직원을 검색. 단, 세금은 12%라 가정.
+
+select * from employee where  salary*0.88>=4000;
+ 
+<31> employee 테이블에서 세금을 제일 많이 내는 직원 순서로 나열하면서 부서번호가 내림차순이면서
+사장이 아닌 직원을 검색?
+
+select * from employee where jikup != '사장' order by salary*0.12 desc, dep_no desc;
+
+<32> employee 테이블에서 20번 부서 중에서 연봉 2000~3000 사이 검색하면?
+
+select * from employee where dep_no=20 and salary>=2000 and salary<=3000;    2000<=salary<=3000 - 안됨
+
+select * from employee where dep_no=20 and salary between 2000 and 3000; <참고>
+
+<33> employee 테이블에서 직속상관이 없는 직원 검색
+
+select * from employee where mgr_emp_no = null 
+
+select * from employee where mgr_emp_no is null 
+
+<주의> null값을 찾을 땐 = 을 쓰지 말것
+
+<34> employee 테이블에서 직속상관이 있는 직원 검색
+
+select * from employee where mgr_emp_no is not null
+
+<주의> null값 있는 데이터 검색 = is , null값 없는 데이터 검색 = is not 
+
+원본데이터에는 곱하기등의 다른 행동이 가해지지 않음
+
 create table dept(						]
  dep_no      	number(3)     	 			]
  ,dep_name  	varchar2(20)    	 not null unique		] 중요
@@ -390,8 +557,8 @@ create table dept(						]
  ,primary key(dep_no)					]
 );							]
 
-
-Insert into dept(dep_no, dep_name, loc) values(10, '청무부', '서울');
+-------중요-------
+Insert <into> dept(dep_no, dep_name, loc) values(10, '청무부', '서울');
 Insert into dept(dep_no, dep_name, loc) values(20, '영업부', '부산');
 Insert into dept(dep_no, dep_name, loc) values(30, '전산부', '대전');
 Insert into dept(dep_no, dep_name, loc) values(40, '자재부', '광주');
@@ -428,8 +595,8 @@ alter table employee disable constraint employee_mgr_emp_no_fk;
 --------------------------------------------
 alter session set nls_date_format = 'yyyy-mm-dd' ;
 
-
-insert into employee values( 1, '홍길동', 10, '사장', 5000, '1980-01-01', '7211271109410', '01099699515', null );
+--------중요-------
+insert <into> employee values( 1, '홍길동', 10, '사장', 5000, '1980-01-01', '7211271109410', '01099699515', null );
 insert into employee values( 2, '한국남', 20, '부장', 3000, '1988-11-01', '6002061841224', '01024948424', 1 );
 insert into employee values( 3, '이순신', 20, '과장', 3500, '1989-03-01', '6209172010520', '01026352672', 2 );
 insert into employee values( 4, '이미라', 30, '대리', 2503, '1983-04-01', '8409282070226', '01094215694', 17 );
@@ -579,3 +746,4 @@ select b_no , subject from board;
 정의, 부연, 예시
 
 정리정돈된 대화 습관
+
