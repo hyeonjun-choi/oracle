@@ -320,8 +320,6 @@ foreign key(FK) <중요, 핵심>
 	▶[참조키], [외래키], [관계키], [종속키] 라고도 한다.
 
 
-foreign key (컬럼명) references 참조테이블명 ~~
-
 
 <11> 시퀀스(Sequence) 가 무엇?
 
@@ -547,6 +545,362 @@ select * from employee where mgr_emp_no is null
 <34> employee 테이블에서 직속상관이 있는 직원 검색
 
 select * from employee where mgr_emp_no is not null
+
+<35> 오라클 4대 천왕
+
+내장함수		=> 미리 만들어진 단위 프로그램으로 호출하면 특정 작업을 하고 데이터를 리턴한다.
+join		=> 서로 다른 테이블의 컬럼을 횡으로 붙이는 작업
+subquery		=> SQL 구문 안의 select 문
+group by		=> 통계 관련 작업
+
+<36> employee 테이블에서 [최소 연봉], [최대 연봉], [평균 연봉], [연봉 총합], [총 인원수]를 검색해서 출력
+
+select
+	min( slalry )	as "최소 연봉"  -- salary 컬럼에서 최소값을 리턴
+	,max( salary )	as "최대 연봉"  -- salary 컬럼에서 최대값을 리턴
+	,avg( salary )	as "평균 연봉"  -- salary 컬럼에서 평균값을 리턴 <조심> avg 사용 시 null 있으면 더할 때 빠지고, 나누는 개수에서도 빠진다
+	,sum( salary )	as "연봉 총합"  -- salary 컬럼에서 총합을 리턴
+	,count( * )	as "총 인원수"  -- count( * )는 총행의 개수
+from
+	employee;
+
+<37> 아래 SQL 구문은 무슨 문제의 답인가?
+select count(emp_no) from customer;
+	==>
+담당 직원 있는 고객의 명수
+	==>중복을 제거한다면==>
+고객을 담당하는 직원의 수
+
+<38> 고객을 담당하고 있는 직원 명수
+
+select count(distinct emp_no) from customer;
+
+<39> 직속상관이 있는 직원의 명수
+
+select count(mgr_emp_no) from employee;
+
+<40> employee 테이블에서 [직원번호], [직원명], [생일월-생일일]를 검색해서 출력
+
+	select
+		emp_no						"직원번호"
+		, emp_name					"직원명"
+		, substr(jumin_num,3,2)||'-'||substr(jumin_num,5,2)	"생일월일"
+	from
+		employee;
+
+오라클은 인덱스 번호가 없다
+
+substr(컬럼명, 카피해올 데이터의 시작번호, 갯수)
+
+<41> customer 테이블에서 모든 컬럼, 모든 행을 검색해서 출력. 단, 주민번호는 901225-2****** 형태로 출력할것
+
+select
+		cus_no						
+		, cus_name					
+		, tel_num
+		, substr(jumin_num,1,6)||'-'||substr(jumin_num,7,1)||'******'
+		, emp_no	
+	from
+		customer;
+
+<43> customer 테이블에서 고객번호, 고객명, 담당직원번호 를 출력하면?
+단, 담당직원번호가 없으면 null 출력하지 말고 '없음' 으로 표시
+
+select 
+	cus-no
+	, cus_name
+	, nvl(emp_no||'','없음')
+from
+	customer;
+
+nvl( 컬럼명, null값일때 대체데이터)
+ -- null값 처리 함수. 컬럼명 안의 데이터가 null이 아니면 그냥 리턴하고,
+  null값 이면 null값대체데이터를 리턴하는 [null처리 내장함수]이다.
+ 
+<43> customer 테이블에서 고객번호, 고객명, 담당직원존재여부 를 출력하면?
+단, 직원번호가 있으면 '있음', 없으면 '없음'으로 표시
+
+select 
+	cus-no
+	, cus_name
+	, nvl2(emp_no, '있음' , '없음')
+from
+	customer;
+
+nvl2( 컬럼명, null값 아닐때 대체 데이터, null값 일때 대체 데이터 ) 
+-- 컬럼명 안의 데이터가 null이 아니면 null값 아닐때 대체데이터로 출력하고
+null이면 null값일때 대체데이터를 리턴하는 [null 처리 내장함수] 이다. 
+	
+
+<44> employee 테이블에서 직원번호, 직원명, 직급, 성별을 출력하면...
+
+select
+	emp_no
+	, emp_name
+	, jikup
+	, case 
+		substr(jumin_num,7,1) when '1' then '남' when '3' then '남' when '2' then '여' when '4' then '여' 
+	end
+from
+	employee
+----------------------------------------------------------------------------------------------------------------------------------
+select
+	emp_no
+	, emp_name
+	, jikup
+	, case 
+		substr(jumin_num,7,1) when '1' then '남' when '3' then '남' else '여' 
+	end
+from
+	employee
+----------------------------------------------------------------------------------------------------------------------------------
+select
+	emp_no
+	, emp_name
+	, jikup
+	, case 
+		when substr(jumin_num,7,1)='1' then '남'
+		when substr(jumin_num,7,1)='3' then '남'
+		else '여'
+	end
+from
+	employee
+
+----------------------------------------------------------------------------------------------------------------------------------
+select
+	emp_no
+	, emp_name
+	, jikup
+	, decode(substr(jumin_num,7,1),'1','남','3','남','여')
+from
+	employee
+
+각 자리수마다 무엇이 있는지 알기 어렵기 때문에 사용에 주의해야
+
+decode 다음 substr시작할때 괄호 반드시 넣어야 함
+
+case = 모든 데이터베이스에서 사용 가능		
+		
+decode = 오라클에서밖에 못씀 		
+
+case substr(컬럼명, 카피해올 데이터의 시작번호, 갯수) when A then B (else) end
+
+
+<45> employee 테이블에서 직원번호, 직원명, 직급, 출생년도를 출력
+
+
+select
+	emp_no
+	, emp_name
+	, jikup
+	, case
+		when substr( jumin_num,7,1)='1'then'19'||substr(jumin_num,1,2)
+		when substr( jumin_num,7,1)='2'then'19'||substr(jumin_num,1,2)
+		when substr( jumin_num,7,1)='3'then'20'||substr(jumin_num,1,2)
+		when substr( jumin_num,7,1)='4'then'20'||substr(jumin_num,1,2)
+	end
+from
+	employee;
+-------------------------->>>
+select
+	emp_no
+	, emp_name
+	, jikup
+	, case
+		when substr( jumin_num,7,1)='1'then'19'
+		when substr( jumin_num,7,1)='2'then'19'
+		else '20'
+		end || substr(jumin_num,1,2)
+from
+	employee;
+--------------------------->>>
+select
+	emp_no
+	, emp_name
+	, jikup
+	, decode (substr(jumin_num,7,1),'1','19'||substr(jumin_num,1,2),'2','19'||substr(jumin_num,1,2),'20'||substr(jumin_num,1,2))
+	, decode (substr(jumin_num,7,1),'1','19','2','19','20'||substr(jumin_num,1,2)) <= 실 정답	
+from
+	employee;
+
+<46> employee 테이블에서 직원번호, 직원명, 직급, 출생년대(4자리)를 출력
+
+select
+	emp_no
+	, emp_name
+	, jikup
+	, case
+		when substr( jumin_num,7,1)='1'then'19'
+		when substr( jumin_num,7,1)='2'then'19'
+		else '20'
+		end || substr(jumin_num,1,1)||'0년대'
+from
+	employee;
+
+<47> employee 테이블에서 나이순으로 출력하면? 연장자가 먼저 나오도록.
+
+select * from employee order by
+	case
+	when substr( jumin_num,7,1)='1'then'19'
+	when substr( jumin_num,7,1)='2'then'19'
+	else '20'
+	end || substr(jumin_num,1,6)
+	asc;
+
+<주의>
+select * from employee order by jumin_num asc; - 오류(2000년생이 먼저 나오기 때문. 2000년생은 주민번호가 00으로 시작.
+
+<48> employee 테이블에서 직급순서대로 정렬하여 모든 컬럼을 보이면?
+
+select * from employee order by 
+	case jikup 
+		when '사장' then 1
+		when '부장' then 2
+		when '과장' then 3
+		when '대리' then 4
+		when '주임' then 5 else 6
+	end
+	asc;
+
+<49> employee 테이블에서 직원번호, 직원명, 입사일(년-월-일) 검색
+
+select 
+	emp_no
+	, emp_name
+	, to_char(hire_date,'YYYY-MM-DD') 
+from 
+	employee;
+
+-------------------------------------------------------------------------------------------
+to_char( 날짜 또는 숫자, '출력문자패턴' )
+문자데이터가 아닌 데이터를 작성자가 원하는 데이터로 전환할 때 필요.
+지정한 날짜 또는 숫자를 원하는 출력문자패턴 으로 바꾸어 주는 변환함수의 일종
+
+
+
+
+<50> employee 테이블에서 직원번호, 직원명, 나이 검색
+
+select 
+	emp_no
+	, emp_name
+	, to_number(to_char(sysdate, 'YYYY')) 
+- to_number( 
+	case
+	substr( jumin_num,7,1) when '1' then'19' when '2' then '19' else '20' end 
+	|| substr(jumin_num,1,2)) 
+	+ 1||'세'
+from 
+	employee;
+
+<51> employee 테이블에서 직원번호, 직원명, 근무년차를 검색 출력
+
+select 
+	emp_no
+	, emp_name
+	, 오늘날짜에서 입사일 날짜까지의 차이를 일수로 구한 다음 365로 나눈 후 소수 첫째 자리에서 무조건 올림
+from employee;
+----------------------------------------------------------------------------------------------------------------------------
+
+select 
+	emp_no					"직원번호"
+	, emp_name				"직원명"
+	, ceil( (sysdate-hire_date)/365 )||'년차'		"근무년차"
+from employee;
+----------------------------------------------------------------------------------------------------------------------------
+★오라클은 날짜-날짜 의 결과값은 날짜차이만큼의 일수이다
+ceil(~)  	=> 소수 첫째 자리에서 무조건 올림해서 리턴하는 수학 함수의 일종이다. (숫자 자료형의 칼럼을 끌어안고)
+floor(~) 	=> 소수 첫째 자리에서 무조건 내림해서 리턴하는 수학 함수의 일종이다.
+
+<참고> 오라클은 날짜 데이터에서 날짜 데이터를 빼면 그 차이만큼을 일 수로 리턴하는 특징 있음.(전용 함수가 없기 때문)
+	더하는 건 아예 없음.
+
+<52> employee 테이블에서 직원번호, 직원명, 연령대를 검색해서 출력하면
+
+select 
+	emp_no					
+	, emp_name				
+	,
+	floor(	(
+	to_number( to_char(sysdate, 'YYYY')) 
+	- to_number( case substr( jumin_num,7,1) when '1' then'19' when '2' then '19' else '20' end 
+	|| substr(jumin_num,1,2)
+	)+ 1
+	)*0.1
+	)||'0대'
+		
+from employee;
+
+<53>  employee 테이블에서 직원번호, 직원명, 100일잔치 날짜를 검색해서 출력하면
+
+select 
+	emp_no					
+	, emp_name				
+	, to_char(
+		to_date(
+			case when substr ( jumin_num,7,1 ) in('1', '2' ) then '19' else '20' end
+				 ||substr(jumin_num,1,6)
+				, 'YYYYMMDD' 
+				)+100
+				, 'YYYY-MM-DD'
+		)	
+from 
+	employee;
+
+<54> 개강일이 2021년 5월 12일 이고 종강일이 2021년 11월 10일 이다. 몇일 동안 학원 생활
+
+select
+	to_date('20211110', 'YYYYMMDD')
+	-
+	to_date('20210512', 'YYYYMMDD')
+from
+	dual;
+
+날짜끼리 빼는 함수 공식
+to_date('큰 날짜', 'YYYYMMDD') - to_date('작은 날짜', 'YYYYMMDD')
+
+
+dual(가상 혹은 더미 테이블) - 존재되어 있는 테이블이 있지 않는 경우
+
+
+<참고>
+~~ where dep_no = 10 or dep_no = 20;
+~~ where dep_no in(10,20);
+
+
+<참고>오라클은 날짜에다가 정수를 더하거나 빼면 정수 만큼의 날짜가 더하거나 빼져 날짜 취급된다(전용 함수 없음)
+
+<55> employee 테이블에서 직원번호, 직원명, 현재나이, 입사일 당시나이를 검색해서 출력
+
+select
+	emp_no
+	, emp_name
+	, to_number(to_char(sysdate, 'YYYY'))
+	- to_number(
+	case
+	substr( jumin_num,7,1) when '1' then'19' when '2' then '19' else '20' end
+	|| substr(jumin_num,1,2))
+	+ 1||'세'
+		, to_number(to_char(hire_date, 'YYYY'))
+	- to_number(
+	case
+	substr( jumin_num,7,1) when '1' then'19' when '2' then '19' else '20' end
+	|| substr(jumin_num,1,2))
+	+ 1||'세'
+
+from
+employee;
+
+<56> employee 테이블에서 직원번호, 직원명, 주민번호, 다가올생일날( 년-월-일 ), 생일까지 남은 일수를 검색하면?
+
+select
+	emp_no
+	, emp_name
+	, jumin_num
+	, case when to date(sysdate, 'MMDD') - todate(jumin_num, 'MMDD')
+
+
+올해 생일을 찍는 경우 생일이 지금 이 시간보다 이후면 올해 생일 찍어야, 지금 이 시간보다 이전이면 내년 생일을 찍어야
 
 <주의> null값 있는 데이터 검색 = is , null값 없는 데이터 검색 = is not 
 
