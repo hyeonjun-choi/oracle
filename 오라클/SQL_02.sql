@@ -81,7 +81,7 @@ create sequence emp_sq
 
 
 
-  select * from employee;
+  select * from employee;    -- ( * 사용 시 create 구문 안의 column 순서대로 전부 사용)
 
   select
 	emp_no		          직원번호  ------------------  테이블에 들어갈 데이터가 아니므로 더블 코트를 사용
@@ -135,7 +135,7 @@ select * from employee where mgr_emp_no = null
 
 
 select
-	min( slalry )	as "최소 연봉"
+	min( salary )	as "최소 연봉"
 	,max( salary )	as "최대 연봉"
 	,avg( salary )	as "연봉 총합"
 	,sum( salary )	as "총 인원수"

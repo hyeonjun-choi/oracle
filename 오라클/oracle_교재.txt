@@ -387,7 +387,7 @@ create sequence sq_emp
 SQL_02.sql 참조
 
 
-<15 ~ 25>(기)
+<15 ~~ >(기)
 <15> employee 테이블에서 모든 컬럼, 모든 행의 데이터를 검색하면?
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -447,8 +447,8 @@ from
   select
 	emp_name           	as "직원명"
 	, jikup		            as "직급"
-	, salary*0.12||'만원'		as "세금"
-	, salary*0.88||'만원'		as "실수령액"
+	, salary*0.12||'만원'		as "세금"		------- 계산하고자 하는 컬럼 * 숫자 || '문자'
+	, salary*0.88||'만원'		as "실수령액"	
 from
 	employee;
 
@@ -458,7 +458,11 @@ select distinct jikup from employee;
 
 select distinct (jikup) from employee;
 
+--
+
 select unique (jikup) from employee;
+
+-- 
 
 <20> employee 테이블에서 부서번호와 직급을 중복없이 검색?
 
@@ -472,10 +476,10 @@ select * from employee where salary >= 3000
 <22> employee 테이블에서 연봉 오름차순으로 검색하면?
 
 select * from employee order by salary  asc;
-                                --- 행의 순서를 바꾸고 싶을때
+                                --- <행의 순서를 바꾸고자 할 때 키워드>
 select * from employee order by salary; ---- asc 생략 가능
 
-select * from employee order by 5 asc;
+select * from employee order by 5 asc; ----order by 바로 뒤 column 명 대신 해당 column의 번호를 쳐도 가능
 
 select * from employee order by 5;
 
@@ -527,6 +531,8 @@ select * from employee where  salary*0.88>=4000;
 사장이 아닌 직원을 검색?
 
 select * from employee where jikup != '사장' order by salary*0.12 desc, dep_no desc;
+
+컬럼 명 != 대상('문자' 혹은 숫자 등) => 대상 제외 하고 검색
 
 <32> employee 테이블에서 20번 부서 중에서 연봉 2000~3000 사이 검색하면?
 
@@ -897,8 +903,9 @@ select
 	emp_no
 	, emp_name
 	, jumin_num
-	, case when to date(sysdate, 'MMDD') - todate(jumin_num, 'MMDD')
-
+	, 
+from
+employee;
 
 올해 생일을 찍는 경우 생일이 지금 이 시간보다 이후면 올해 생일 찍어야, 지금 이 시간보다 이전이면 내년 생일을 찍어야
 
