@@ -134,6 +134,183 @@ select * from employee where dep_no = 20 and 3000 >= salary and 2000 <= salary;
 select * from employee where mgr_emp_no = null
 
 
+select
+	min( slalry )	as "최소 연봉"
+	,max( salary )	as "최대 연봉"
+	,avg( salary )	as "연봉 총합"
+	,sum( salary )	as "총 인원수"
+from
+	employee;
+
+select count(emp_no) from customer;
+
+select count(distinct emp_no) from customer;
+
+select count(mgr_emp_no) from employee;
+
+select
+		emp_no						"직원번호"
+		, emp_name					"직원명"
+		, substr(jumin_num,3,2)||'-'||substr(jumin_num,5,2)	"생일월일"
+from
+		employee;
+
+select
+		cus_no
+		, cus_name
+		, tel_num
+		, substr(jumin_num,1,6)||'-'||substr(jumin_num,7,1)||'******'
+		, emp_no
+from
+		customer;
+
+
+select
+	cus_no
+	, cus_name
+	, nvl(emp_no||'','없음')
+from
+	customer;
+
+select
+	emp_no
+	, emp_name
+	, jikup
+	, case
+		substr(jumin_num,7,1) when '1' then '남' when '3' then '남' when '2' then '여' when '4' then '여'
+	end
+from
+	employee;
+
+select
+	emp_no
+	, emp_name
+	, jikup
+	, case
+		when substr( jumin_num,7,1)='1'then'19'||substr(jumin_num,1,2)
+		when substr( jumin_num,7,1)='2'then'19'||substr(jumin_num,1,2)
+		when substr( jumin_num,7,1)='3'then'20'||substr(jumin_num,1,2)
+		when substr( jumin_num,7,1)='4'then'20'||substr(jumin_num,1,2)
+	end
+from
+	employee;
+
+ select
+	emp_no
+	, emp_name
+	, jikup
+	, case
+		when substr( jumin_num,7,1)='1'then'19'
+		when substr( jumin_num,7,1)='2'then'19'
+		else '20'
+		end || substr(jumin_num,1,2)
+from
+	employee;
+
+
+
+select
+	emp_no
+	, emp_name
+	, jikup
+	, case
+		when substr( jumin_num,7,1)='1'then'19'
+		when substr( jumin_num,7,1)='2'then'19'
+		else '20'
+		end || substr(jumin_num,1,1)||'0년대'
+from
+	employee;
+
+select
+	emp_no
+	, emp_name
+	, jikup
+    , decode (substr(jumin_num,7,1),'1','19','2','19','20'||substr(jumin_num,1,2))
+
+from
+	employee;
+
+
+select * from employee order by
+	case
+	when substr( jumin_num,7,1)='1'then'19'
+	when substr( jumin_num,7,1)='2'then'19'
+	else '20'
+	end || substr(jumin_num,1,6)
+	asc;
+
+
+
+select * from employee order by
+	case jikup
+		when '사장' then 1
+		when '부장' then 2
+		when '과장' then 3
+		when '대리' then 4
+		when '주임' then 5 else 6
+	end
+	asc;
+
+
+select
+	emp_no
+	, emp_name
+	, to_char(hire_date,'YYYY-MM-DD')
+from
+	employee;
+
+select
+	emp_no
+	, emp_name
+	, to_number(to_char(sysdate, 'YYYY'))
+- to_number(
+	case
+	substr( jumin_num,7,1) when '1' then'19' when '2' then '19' else '20' end
+	|| substr(jumin_num,1,2))
+	+ 1||'세'
+from
+	employee;
+
+select
+	emp_no
+	, emp_name
+	,
+	floor(
+		(
+ to_number(to_char(sysdate, 'YYYY'))
+- to_number(
+	case substr( jumin_num,7,1) when '1' then'19' when '2' then '19' else '20' end
+	|| substr(jumin_num,1,2)
+	)+ 1
+	)*0.1
+	)||'0대'
+
+from employee;
+
+select
+	emp_no
+	, emp_name
+	, to_number(to_char(sysdate, 'YYYY'))
+	- to_number(
+	case
+	substr( jumin_num,7,1) when '1' then'19' when '2' then '19' else '20' end
+	|| substr(jumin_num,1,2))
+	+ 1||'세'
+		, to_number(to_char(hire_date, 'YYYY'))
+	- to_number(
+	case
+	substr( jumin_num,7,1) when '1' then'19' when '2' then '19' else '20' end
+	|| substr(jumin_num,1,2))
+	+ 1||'세'
+
+from
+employee;
+
+
+
+
+
+
  --employee_mgr_emp_no_fk라는 이름의 fk 제약조건 끄기. 즉, 제약 조건 임시 무력화.
 alter table employee disable constraint employee_mgr_emp_no_fk;
 
@@ -231,3 +408,11 @@ commit;
 
 --참조하는 테이블을 먼저 지우는 것을 원칙으로(그다음이 당하는 테이블)
 
+
+
+select
+	to_date('20211110', 'YYYYMMDD')
+	-
+	to_date('20210512', 'YYYYMMDD')
+from
+	dual;
