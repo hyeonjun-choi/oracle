@@ -320,6 +320,8 @@ foreign key(FK) <중요, 핵심>
 	▶[참조키], [외래키], [관계키], [종속키] 라고도 한다.
 
 
+foreign key (컬럼명) references 참조테이블명 ~~
+
 
 <11> 시퀀스(Sequence) 가 무엇?
 
