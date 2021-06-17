@@ -566,24 +566,46 @@ select
 	,max( salary )	as "최대 연봉"  -- salary 컬럼에서 최대값을 리턴
 	,avg( salary )	as "평균 연봉"  -- salary 컬럼에서 평균값을 리턴 <조심> avg 사용 시 null 있으면 더할 때 빠지고, 나누는 개수에서도 빠진다
 	,sum( salary )	as "연봉 총합"  -- salary 컬럼에서 총합을 리턴
-	,count( * )	as "총 인원수"  -- count( * )는 총행의 개수
+	,count( * )	as "총 인원수"  -- count( * )는 총행의 개수 --
 from
 	employee;
 
+★min, max, avg, sum, count 함수들을 [그룹함수] 또는 [통합함수]라고 부르기도 한다.
+그룹지어서 연산을 하는 함수이기 때문
+그룹함수들은 주로 group by 와 같이 많이 사용된다.
+★min, max, avg, sum, count 함수들은 null값 제외하고 계산한다.
+count(컬럼명) => 컬럼안의 null이 아닌 데이터의 개수를 리턴한다.
+count(*)	      => 행의 개수를 리턴한다.
+
+ex, select count (cus_no) from customer;
+
+
 <37> 아래 SQL 구문은 무슨 문제의 답인가?
-select count(emp_no) from customer;
+select count (emp_no) from customer;
 	==>
-담당 직원 있는 고객의 명수
+emp_no 컬럼안의 담당 직원의 직원번호이므로 직원번호의 개수는 결국 담당 직원이 있는 고객의 명수가 된다.
 	==>중복을 제거한다면==>
-고객을 담당하는 직원의 수
 
 <38> 고객을 담당하고 있는 직원 명수
 
 select count(distinct emp_no) from customer;
 
+distinct 컬럼명 => 컬럼 안의 데이터 중 중복을 제거
+
 <39> 직속상관이 있는 직원의 명수
 
 select count(mgr_emp_no) from employee;
+
+<주의>mgr_emp_no 컬럼 안의 데이터가 뭔지 뭔저 파악해야한다. 바로 직속 상관의 직원번호이다.
+
+<39-2>부하직원이 있는 직원의 명수?
+
+select count(distinct mgr_emp_no) from employee;
+
+distinct 컬럼명 => 컬럼 안의 데이터의 중복을 제거
+<주의> count에는 업무적 특징이 숨어 있어 조심히 날려야한다.
+		  ||
+고객의 다양하고 복잡한 요구사항
 
 <40> employee 테이블에서 [직원번호], [직원명], [생일월-생일일]를 검색해서 출력
 
@@ -594,11 +616,15 @@ select count(mgr_emp_no) from employee;
 	from
 		employee;
 
+ *****substr(컬럼명, 복사할 시작순서번호, 복사할개수) => 시작순서번호 부터 복사할개수 만큼 복사해서 리턴하기
+						엄청난 사용빈도를 자랑한다.
+
 오라클은 인덱스 번호가 없다
 
-substr(컬럼명, 카피해올 데이터의 시작번호, 갯수)
+★ substr(컬럼명, 카피해올 데이터의 시작번호, 갯수)
 
-<41> customer 테이블에서 모든 컬럼, 모든 행을 검색해서 출력. 단, 주민번호는 901225-2****** 형태로 출력할것
+<41> customer 테이블에서 모든 컬럼, 모든 행을 검색해서 출력. 
+단, 주민번호는 901225-2****** 형태로 출력할것
 
 select
 		cus_no						
@@ -609,7 +635,19 @@ select
 	from
 		customer;
 
-<43> customer 테이블에서 고객번호, 고객명, 담당직원번호 를 출력하면?
+<주의> '모든 행' 이란 말이 나오면 where절이 없다.
+
+*****substr(컬럼명, 복사할 시작순서번호, 복사할개수) => 시작순서번호 부터 복사할개수 만큼 복사해서 리턴하기
+						엄청난 사용빈도를 자랑한다.
+
+||  ==> 좌우의 문자열을 붙이는 연산자, 즉 연결 연산자이다.
+<주의> 오라클에서 + 는 연결연산자가 아니라 사칙연산자이다.
+
+'tom'||'my'
+
+'tom'||123  --> 'tom'||'123' -->  'tom123' 
+
+<42> customer 테이블에서 고객번호, 고객명, 담당직원번호 를 출력하면?
 단, 담당직원번호가 없으면 null 출력하지 말고 '없음' 으로 표시
 
 select 
@@ -619,7 +657,8 @@ select
 from
 	customer;
 
-nvl( 컬럼명, null값일때 대체데이터)
+★nvl( 컬럼명, null값일때 대체데이터)
+
  -- null값 처리 함수. 컬럼명 안의 데이터가 null이 아니면 그냥 리턴하고,
   null값 이면 null값대체데이터를 리턴하는 [null처리 내장함수]이다.
  
@@ -633,7 +672,8 @@ select
 from
 	customer;
 
-nvl2( 컬럼명, null값 아닐때 대체 데이터, null값 일때 대체 데이터 ) 
+★nvl2( 컬럼명, null값 아닐때 대체 데이터, null값 일때 대체 데이터 ) 
+
 -- 컬럼명 안의 데이터가 null이 아니면 null값 아닐때 대체데이터로 출력하고
 null이면 null값일때 대체데이터를 리턴하는 [null 처리 내장함수] 이다. 
 	
@@ -645,7 +685,11 @@ select
 	, emp_name
 	, jikup
 	, case 
-		substr(jumin_num,7,1) when '1' then '남' when '3' then '남' when '2' then '여' when '4' then '여' 
+		substr(jumin_num,7,1)
+		when '1' then '남'
+		when '3' then '남' 
+		when '2' then '여' 
+		when '4' then '여' 
 	end
 from
 	employee
@@ -655,7 +699,10 @@ select
 	, emp_name
 	, jikup
 	, case 
-		substr(jumin_num,7,1) when '1' then '남' when '3' then '남' else '여' 
+		substr(jumin_num,7,1) 
+		when '1' then '남' 
+		when '3' then '남' 
+		else '여' 
 	end
 from
 	employee
@@ -677,17 +724,69 @@ select
 	emp_no
 	, emp_name
 	, jikup
-	, decode(substr(jumin_num,7,1),'1','남','3','남','여')
+	, decode(
+		substr(jumin_num,7,1),'1','남','3','남','여')
 from
 	employee
+----------------------------------------------------------------------------------------------------------
+case ~ end 구문 패턴 설명
 
+<패턴1>
+●case 컬럼명 
+	when 데이터1 then 리턴값1
+	when 데이터2 then 리턴값2
+	~
+	else 리턴값n
+end
+
+컬럼명 안의 데이터가 데이터1과 같으면 리턴값1을 리턴
+컬럼명 안의 데이터가 데이터2과 같으면 리턴값2을 리턴
+~
+그 외에는 리턴값n을 리턴하기
+
+<패턴2>
+●case 컬럼명 
+	when 컬럼명 = 데이터1 then 리턴값1
+	when 컬럼명 = 데이터2 then 리턴값2
+	~
+	else 리턴값n
+end
+
+
+컬럼명 안의 데이터가 데이터1과 같으면 리턴값1을 리턴
+컬럼명 안의 데이터가 데이터2과 같으면 리턴값2을 리턴
+~
+그 외에는 리턴값n을 리턴하기
+
+패턴2 에서 = 대신에 필요에 따라 >=, >, <, <=, != 등의 비교연산자도 사용할 수 있다.
+필요에 따라 else 리턴값n은 생략될 수 있다.
+
+decode(~) 구문의 패턴 설명
+
+decode(
+	컬럼명
+	, 비교데이터1, 리턴값1
+	, 비교데이터2, 리턴값2
+	, ~
+	, 리턴값n
+)
+
+
+컬럼명 안의 데이터가 데이터1과 같으면 리턴값1을 리턴
+컬럼명 안의 데이터가 데이터2과 같으면 리턴값2을 리턴
+~
+그 외에는 리턴값n을 리턴하기
+
+
+필요에 따라 그외 경우 리턴값n은 생략될 수 있다.
+
+decode 단점 =
+ 오라클에서밖에 못쓰는 오라클 전용함수. case ~ end 구문은 모든 DB에서 사용가능하다.
+ '같다'라는 조건에서만 사용 가능
+-----------------------------------------------------------------------------------------------------------
 각 자리수마다 무엇이 있는지 알기 어렵기 때문에 사용에 주의해야
 
-decode 다음 substr시작할때 괄호 반드시 넣어야 함
-
-case = 모든 데이터베이스에서 사용 가능		
-		
-decode = 오라클에서밖에 못씀 		
+case = 모든 데이터베이스에서 사용 가능			
 
 case substr(컬럼명, 카피해올 데이터의 시작번호, 갯수) when A then B (else) end
 
@@ -725,7 +824,7 @@ select
 	, emp_name
 	, jikup
 	, decode (substr(jumin_num,7,1),'1','19'||substr(jumin_num,1,2),'2','19'||substr(jumin_num,1,2),'20'||substr(jumin_num,1,2))
-	, decode (substr(jumin_num,7,1),'1','19','2','19','20'||substr(jumin_num,1,2)) <= 실 정답	
+	, decode (substr(jumin_num,7,1), '1', '19', '2', '19', '20') || substr(jumin_num,1,2) <= 실 정답	
 from
 	employee;
 
@@ -745,7 +844,7 @@ from
 
 <47> employee 테이블에서 나이순으로 출력하면? 연장자가 먼저 나오도록.
 
-select * from employee order by
+select * from employee order by                                  <-----------정렬 기준으로
 	case
 	when substr( jumin_num,7,1)='1'then'19'
 	when substr( jumin_num,7,1)='2'then'19'
@@ -755,6 +854,12 @@ select * from employee order by
 
 <주의>
 select * from employee order by jumin_num asc; - 오류(2000년생이 먼저 나오기 때문. 2000년생은 주민번호가 00으로 시작.
+
+order by 뒤는 정렬 기준 컬럼이 나온다. 정렬 기준 컬럼을 case가 끌어 안아서 다른 형태로 바꾼 것이다. 
+
+order by 구문의 패턴
+
+order by 컬럼명 | 컬럼순서번호 | 컬럼알리아스 [asc] | desc
 
 <48> employee 테이블에서 직급순서대로 정렬하여 모든 컬럼을 보이면?
 
@@ -768,21 +873,74 @@ select * from employee order by
 	end
 	asc;
 
-<49> employee 테이블에서 직원번호, 직원명, 입사일(년-월-일) 검색
+select * from employee order by 
+	decode( jikup, '사장', 1, '부장', 2, '과장', 3, '대리', 4, '주임', 5, 6 ) asc; 
+			숫자 반대 상황의 경우 다르게 해석할 수 있으니 조심해서
+
+
+order by 뒤는 정렬 기준 컬럼이 나온다. 정렬 기준 컬럼을 case가 끌어 안아서 다른 형태로 바꾼 것이다. 
+
+정렬 시 사장은 1로 보고, 부장은 2로 보고, 과장은 3으로 보고, 대리는 4로 보고, 주임은 5로 보고 기타는 6으로 보고
+오름차순으로 정렬. 즉, 직급을 정수로 바꿔서 정렬을 한 것이다.
+
+＠asc를 desc로 바꾸면 직급이 낮은 사람이 먼저 나온다
+
+<49> employee 테이블에서 직원번호, 직원명, 입사일(년-월-일(요일) 분기 시분초) 검색
 
 select 
 	emp_no
 	, emp_name
-	, to_char(hire_date,'YYYY-MM-DD') 
+	, to_char(hire_date,'YYYY-MM-DD(D(A생략가능)Y) Q<분기> AM<오전. 오후는 PM 또는 HH24> < HH:MI:SS<시분초>' 
+	, 'nls_date_language = Korean') 
 from 
 	employee;
 
 -------------------------------------------------------------------------------------------
-to_char( 날짜 또는 숫자, '출력문자패턴' )
+to_char( 날짜 또는 숫자 컬럼, '출력시 원하는 문자패턴' )
+
 문자데이터가 아닌 데이터를 작성자가 원하는 데이터로 전환할 때 필요.
+
 지정한 날짜 또는 숫자를 원하는 출력문자패턴 으로 바꾸어 주는 변환함수의 일종
+주로 출력할기 위해 사용.
+
+YYYY 	=> 년도 4자리
+MM  	=> 월 2자리
+DD   	=> 일 2자리
+AM HH	=> 오전 | 오후 1~12 사이의 시간
+HH24 	=> 0~23 사이의 시간
+MI	=> 0~59 사이의 분
+SI	=> 0~59 사이의 초
+DAY	=> 영문 요일 풀네임
+DY 	=> 영문 요일 요약
+Q 	=> 1~4 사이의 분기
+
+to_char(hire_date, 'YYYY-MM-DD')
+hire_date 컬럼 안의 데이터를 년-월-일 패턴의 문자열로 바꾸어 리턴하라
 
 
+<49-2> employee 테이블에서 직원번호, 직우너명, 입사일(x년-x월-x일(요일) x분기 x시x분x초 ) 검색하라
+1999년-12월-25일(화) 4분기 11시 10분 22초
+
+select
+	emp_no
+	, emp_name
+	, to_char(hire_date,'YYYY')||'년'
+		|| to_char(hire_date, 'MM')||'월'
+		|| to_char(hire_date, 'DD') ||'일'
+		|| to_char(hire_date, '(DY)', 'nls_date_language = Korean')
+		|| to_char(hire_date, 'Q' ) || '분기' 
+		|| to_char(hire_date, 'AM HH' ) || '시'
+		|| to_char(hire_date, ' :MI' ) || '분'
+		|| to_char(hire_date, ' :SS' ) || '초'
+from
+	employee;
+
+select 
+	emp_no
+	, emp_name
+	, to_char(hire_date, 'YYYY"년"MM"월"DD"일"(DY) Q"분기" AM HH"시"MI"분"SS"초" ' , 'NLS_DATE_LANGUAGE = KOREAN' )
+from 
+	employee;
 
 
 <50> employee 테이블에서 직원번호, 직원명, 나이 검색
@@ -798,6 +956,26 @@ select
 	+ 1||'세'
 from 
 	employee;
+--------------------------------------------------------------------------------------------------------------------
+
+select 
+	emp_no
+	, emp_name
+	, to_number( to_char(sysdate, 'YYYY') )
+	-
+	to_number(
+		(case substr( jumin_num,7,1) when '1' then'19' when '2' then '19' else '20' end 
+		|| substr(jumin_num,1,2) 
+	) + 1 || '세'
+
+from 
+	employee;
+
+----------------------------------------------------------------------------------------------------------------------
+to_number(숫자문자내장된컬럼명) => 컬럼명 안의 숫자 물자를 숫자로 변경하는 변환함수
+
+
+
 
 <51> employee 테이블에서 직원번호, 직원명, 근무년차를 검색 출력
 
@@ -853,6 +1031,15 @@ select
 from 
 	employee;
 
+
+날짜 + 정수 	==> 날짜에 정수만큼의 일수를 더한 날짜를 리턴
+날짜 - 정수 	==> 날짜에 정수만큼의 일수를 뺀 날짜 리턴
+날짜1-날짜2 	==> 날짜1과 날짜2 까지의 차이를 일수로 리턴. 일수 양수가 날짜1이 날짜2보다 큰 것(음수 반대)
+날짜1+날짜2	==> 없음
+
+
+순서대로 1. 100을 더하기 위해 날짜로 바꾸고 2. 'YYYY-MM-DD'화 하기 위해 문자로 바꿈
+
 <54> 개강일이 2021년 5월 12일 이고 종강일이 2021년 11월 10일 이다. 몇일 동안 학원 생활
 
 select
@@ -883,14 +1070,12 @@ select
 	, emp_name
 	, to_number(to_char(sysdate, 'YYYY'))
 	- to_number(
-	case
-	substr( jumin_num,7,1) when '1' then'19' when '2' then '19' else '20' end
+	case substr( jumin_num,7,1) when '1' then'19' when '2' then '19' else '20' end
 	|| substr(jumin_num,1,2))
 	+ 1||'세'
-		, to_number(to_char(hire_date, 'YYYY'))
+	, to_number(to_char(hire_date, 'YYYY'))
 	- to_number(
-	case
-	substr( jumin_num,7,1) when '1' then'19' when '2' then '19' else '20' end
+	case substr( jumin_num,7,1) when '1' then'19' when '2' then '19' else '20' end
 	|| substr(jumin_num,1,2))
 	+ 1||'세'
 
@@ -900,18 +1085,131 @@ employee;
 <56> employee 테이블에서 직원번호, 직원명, 주민번호, 다가올생일날( 년-월-일 ), 생일까지 남은 일수를 검색하면?
 
 select
-	emp_no
-	, emp_name
-	, jumin_num
-	, 
+	emp_no		"직원번호"
+	, emp_name	"직원명"
+	, jumin_num	"주민번호"
+	, case when 
+	to_date( to_char( sysdate,'YYYY') || substr(jumin_num,3,4), 'YYYYMMDD')  --- 올해 생일
+	- sysdate				      			       --- 지금 이시각 날짜		
+	>=0
+	then 
+	to_char( to_date( to_char(sysdate,'YYYY') || substr(jumin_num,3,4), 'YYYYMMDD'), 'YYYYMMDD' ) 
+	else
+	to_char( to_date( to_number(to_char(sysdate,'YYYY'))+1 || substr(jumin_num,3,4), 'YYYYMMDD'), 'YYYYMMDD (dy)' ) 	
+	end  "다가올 생일날"
+	, case when 
+	to_date( to_number( to_char( sysdate,'YYYY') || substr(jumin_num,3,4), 'YYYYMMDD')  
+	- sysdate				      			     		
+	>=0
+	then 
+	to_date( to_number( to_char( sysdate,'YYYY') || substr(jumin_num,3,4), 'YYYYMMDD') 
+	- sysdate
+	else
+	to_date( extract( year from sysdate,'YYYY')+1 || substr(jumin_num,3,4), 'YYYYMMDD')
+	- sysdate	
+	end  "생일까지 남은 일수"
 from
-employee;
+	employee
+order by "생일까지 남은 일수" asc;
+
+생일까지 남은 일수 계산방법
+
+	 만약 올해생일날짜-지금날짜 값이 양수면 생일이 안 지났으므로 올해생일날짜-지금날짜 면 된다.
+	 만약 올해생일날짜-지금날짜 값이 음수면 생일이 지났으므로 내년생일날짜-지금날짜 면 된다.
+	
+<56> employee 테이블에서 직원번호, 직원명, 직급, 연봉(xxx,xxx,xxx만원) 를 검색하면
+
+select
+	emp_no						"직원번호"
+	, emp_name					"직원명"
+	, jikup						"직급"
+	, to_char( salary, '999,999,999' ) || '만원'		"연봉"
+from
+	employee
+--------------------------------------------------------------------------
+ to_char( salary, '999,999,999' )  ==> salary 컬럼안의 숫자를 3자리마다 끊어서 , 를 삽입해서 문자로 리턴하기 
+				만약 각 9 자리에 대응하는 숫자 없으면 화면에 출력이 안된다.
+--------------------------------------------------------------------------
+ to_char( salary, '099,999,999' )  ==> salary 컬럼안의 숫자를 3자리마다 끊어서 , 를 삽입해서 문자로 리턴하기 
+				맨앞에 0이 있으면 그자리가 비면 0 이 대체된다. 따라서 나머지도 9이어도 다
+				0으로 대체가 된다.
+
+<57> employee 테이블에서 수요일에 태어난 직원ㅇ르 검색
+
+select * from employee
+where to_char(jumin_num, '(DY)', 'nls_date_language = Korean') = '수요일'
+
+select * from employee;
+where , to_char(
+		to_date(
+			case when substr ( jumin_num,7,1 ) in('1', '2' ) then '19' else '20' end
+				 ||substr(jumin_num,1,6), 'YYYYMMDD' ), 'YYYY-MM-DD')
+			 to_char(hire_date, '(DY)', 'nls_date_language = Korean')= '수요일'
+
+
+<57> 오라클의 자주 사용되는 숫자함수 예를 보여주시오
+
+abs( n ) - 숫자 n의 절대값을 반환
+
+floor( n ) - 숫자 n이 정수면 그대로 반환하고, 실수면 실수보다 작으면서 제일 가까운 정수를 반환.
+	  좌표계에서 쿵 찍어서 왼쪽 정수값
+
+ceil( n ) - 숫자 n이 정수면 그대로 반환하고, 실수면 실수보다 크면서 제일 가까운 정수를 반환.
+	좌표계에서 쿵 찍어서 오른쪽 정수값
+
+round( n, m ) - 숫자 n 에서 소수 m+1 자리에서 반올림한 수 리턴
+
+trunc( n, m ) - 숫자 n 에서 소수 m+1 자리부터 버림
+
+sign( n ) - n>0 이면 1, n<0 이면 -1, n=0 면 0을 반환
+
+mod( n, m ) - n/m 후 나머지 값을 반환
+
+power( n, m ) - n의 m 승을 반환.
+
+
+<58> 오라믈의 자주 사용되는 문자 함수 예를 보여주시오
+
+chr( n ) - 정수 n을 ascii( 아스키 ) 문자기호로 리턴한다
+
+upper( s ) - 문자열 s을 대문자로 변환시켜 리턴한다
+
+lower( s ) - 문자열 s을 소문자로 변환시켜 리턴한다
+
+length( s ) - 문자열 s의 길이를 리턴한다.
+
+substr( s, n1, n2 ) 	- 문자열 s에서 n1 번째 자리부터 n2개 까지의 문자를 리턴한다.
+	           	- n2 생략 시 마지막 까지 문자를 리턴한다.
+		- n1이 0일 경우 1로 바꿔 실행된다.
+		- 자리수는 n1>0 경우 왼쪽부터, n1<0 경우 오른쪽부터 샘한다.
+---------------------------------------------------------------------------------------------
+		select substr( 'you are not alone', 9, 3 ) from dual;
+		select substr( 'you are not alone', 0, 5 ) from dual;
+		select substr( 'you are not alone', 5 ) from dual;
+		select substr( 'you are not alone', -5, 2 ) from dual;
+		select substr( 'you are not alone', 5, 0 ) from dual;
+trim( s ) - 문자열 s1의 맨좌우측의 공백을 제거하여 리턴한다.
+	제거 후 또 있으면 계속 제거 후 리턴한다.
+
+<58> employee 테이블에서 70년대생 남자 직원 검색
+
+select * from employee
+	floor( ( to_number( case substr( jumin_num,7,1) when '1' then'19' when '2' then '19' else '20' end 
+	|| substr(jumin_num,1,2) )+ 1)*0.1)||'0대' 
+	decode( substr(jumin_num,7,1),'1','남','3','남','여')end = '70년대생 남자 직원'
+	
+
 
 올해 생일을 찍는 경우 생일이 지금 이 시간보다 이후면 올해 생일 찍어야, 지금 이 시간보다 이전이면 내년 생일을 찍어야
 
 <주의> null값 있는 데이터 검색 = is , null값 없는 데이터 검색 = is not 
 
 원본데이터에는 곱하기등의 다른 행동이 가해지지 않음
+
+오라클 함수 : 
+
+
+
 
 create table dept(						]
  dep_no      	number(3)     	 			]

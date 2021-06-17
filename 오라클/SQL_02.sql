@@ -8,6 +8,9 @@
 ---grant connect, resource, dba to king;
 
 
+select floor(-3.1) from dual;
+
+
 -------------------------------------
 ---emp_sq 시퀀스 제거
 ---cus_sq 시퀀스 제거
@@ -255,9 +258,64 @@ select * from employee order by
 select
 	emp_no
 	, emp_name
-	, to_char(hire_date,'YYYY-MM-DD')
+	, to_char(hire_date,'YYYY-MM-DD(DY) Q AM HH:MI:SS', 'nls_date_language = Korean')
 from
 	employee;
+
+select
+	emp_no
+	, emp_name
+	, to_char(hire_date,'YYYY')||'년'
+		|| to_char(hire_date, 'MM')||'월'
+		|| to_char(hire_date, 'DD') ||'일'
+		|| to_char(hire_date, '(DY)', 'nls_date_language = Korean')
+		|| to_char(hire_date, 'Q' ) || '분기'
+		|| to_char(hire_date, 'AM HH' ) || '시'
+		|| to_char(hire_date, ' :MI' ) || '분'
+		|| to_char(hire_date, ' :SS' ) || '초'
+from
+	employee;
+
+select
+	emp_no		"직원번호"
+	, emp_name	"직원명"
+	, jumin_num	"주민번호"
+	, case when
+	to_date( to_char( sysdate,'YYYY') || substr(jumin_num,3,4), 'YYYYMMDD')  --- 올해 생일
+	- sysdate				      			       --- 지금 이시각 날짜
+	>=0
+	then
+	to_char( to_date( to_char(sysdate,'YYYY') || substr(jumin_num,3,4), 'YYYYMMDD'), 'YYYYMMDD' )
+	else
+	to_char( to_date( to_number(to_char(sysdate,'YYYY'))+1 || substr(jumin_num,3,4), 'YYYYMMDD'), 'YYYYMMDD (DY)' )
+	end  "다가올 생일날"
+	, case when
+	to_date( to_number( to_char( sysdate,'YYYY') || substr(jumin_num,3,4), 'YYYYMMDD')
+	- sysdate
+	>=0
+	then
+	to_date( to_number( to_char( sysdate,'YYYY') || substr(jumin_num,3,4), 'YYYYMMDD')
+	- sysdate
+	else
+	to_date( extract( year from sysdate,'YYYY')+1 || substr(jumin_num,3,4), 'YYYYMMDD')
+	- sysdate
+	end  "생일까지 남은 일수"
+from
+	employee
+order by 5 asc;
+
+select
+	emp_no						"직원번호"
+	, emp_name					"직원명"
+	, jikup						"직급"
+	, to_char( salary, '099,999,999' ) || '만원'		"연봉"
+from
+	employee
+
+
+
+
+
 
 select
 	emp_no
@@ -306,8 +364,20 @@ select
 from
 employee;
 
+-- employee 테이블에서 수요일에 태어난 직원을 검색
 
+select * from employee;
+where , to_char(
+		to_date(
+			case when substr ( jumin_num,7,1 ) in('1', '2' ) then '19' else '20' end
+				 ||substr(jumin_num,1,6)
+				, 'YYYYMMDD' )
+				, 'DY', 'nls_date_language = Korean')= '수요일'
 
+select * from employee
+	floor( ( to_number( case substr( jumin_num,7,1) when '1' then'19' when '2' then '19' else '20' end
+	|| substr(jumin_num,1,2) )+ 1)*0.1)||'0대'
+	and decode( substr(jumin_num,7,1),'1','남','3','남','여')end = '70년대생 남자 직원'
 
 
 
