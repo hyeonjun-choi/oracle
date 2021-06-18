@@ -1134,19 +1134,31 @@ from
 				맨앞에 0이 있으면 그자리가 비면 0 이 대체된다. 따라서 나머지도 9이어도 다
 				0으로 대체가 된다.
 
-<57> employee 테이블에서 수요일에 태어난 직원ㅇ르 검색
+<57> employee 테이블에서 수요일에 태어난 직원을 검색
 
 select * from employee
-where to_char(jumin_num, '(DY)', 'nls_date_language = Korean') = '수요일'
-
-select * from employee;
-where , to_char(
+where to_char(
 		to_date(
-			case when substr ( jumin_num,7,1 ) in('1', '2' ) then '19' else '20' end
-				 ||substr(jumin_num,1,6), 'YYYYMMDD' ), 'YYYY-MM-DD')
-			 to_char(hire_date, '(DY)', 'nls_date_language = Korean')= '수요일'
+			decode( substr( jumin_num,7,1), '1' , '19' , '2' , '19' , '20' ) || substr( jumin_num,1,6 ), 'YYYYMMDD' )
+		,'DAY'
+		,'nls_date_language = Korean') = '수요일'
+
+select * from employee
+where to_char(
+		to_date(
+			decode( substr( jumin_num,7,1), '1' , '19' , '2' , '19' , '20' ) || substr( jumin_num,1,6 ), 'YYYYMMDD' )
+		,'DY'
+		,'nls_date_language = Korean') = '수'
+
+select * from employee
+where to_char(
+		to_date(
+			decode( substr( jumin_num,7,1), '1' , '19' , '2' , '19' , '20' ) || substr( jumin_num,1,6 ), 'YYYYMMDD' )
+		,'D'
+		) = '4'
 
 
+----------------------------------------------------------------------------------------------------------------------------
 <57> 오라클의 자주 사용되는 숫자함수 예를 보여주시오
 
 abs( n ) - 숫자 n의 절대값을 반환
@@ -1168,7 +1180,7 @@ mod( n, m ) - n/m 후 나머지 값을 반환
 power( n, m ) - n의 m 승을 반환.
 
 
-<58> 오라믈의 자주 사용되는 문자 함수 예를 보여주시오
+<58> 오라클의 자주 사용되는 문자 함수 예를 보여주시오
 
 chr( n ) - 정수 n을 ascii( 아스키 ) 문자기호로 리턴한다
 
@@ -1176,7 +1188,7 @@ upper( s ) - 문자열 s을 대문자로 변환시켜 리턴한다
 
 lower( s ) - 문자열 s을 소문자로 변환시켜 리턴한다
 
-length( s ) - 문자열 s의 길이를 리턴한다.
+length( s ) - 문자열 s의 길이를 리턴한다. (0 이상의 정수)
 
 substr( s, n1, n2 ) 	- 문자열 s에서 n1 번째 자리부터 n2개 까지의 문자를 리턴한다.
 	           	- n2 생략 시 마지막 까지 문자를 리턴한다.
@@ -1194,10 +1206,299 @@ trim( s ) - 문자열 s1의 맨좌우측의 공백을 제거하여 리턴한다.
 <58> employee 테이블에서 70년대생 남자 직원 검색
 
 select * from employee
-	floor( ( to_number( case substr( jumin_num,7,1) when '1' then'19' when '2' then '19' else '20' end 
-	|| substr(jumin_num,1,2) )+ 1)*0.1)||'0대' 
-	decode( substr(jumin_num,7,1),'1','남','3','남','여')end = '70년대생 남자 직원'
-	
+	where
+		substr( jumin_num, 1, 1) = '7'
+		and	
+		substr( jumin_num, 7, 1) = '1'
+
+<59> employee 테이블에서 1960년대, 1970년대 출생자중 남자만 검색
+
+select * from employee
+	where
+		(substr( jumin_num, 1, 1) = '6' or substr( jumin_num, 1, 1) = '7')
+		and	
+		(substr( jumin_num, 7, 1) = '1' or substr( jumin_num, 7, 1) = '3')		
+
+둥근 괄호 없을 시 and가 or보다 먼저 사용되어진다 (순서 주의)
+
+<60> employee 테이블에서 올해 근무한 직원이 먼저 나오게 검색
+
+select * from employee order by 
+	to_number(hire_date - sysdate) desc;
+
+select * from employee order by 
+	(sysdate - hire_date) desc;
+---------------------------------------------------------------------------------------------------------------------
+sysdate - hire_date => 지금날짜 - 입사일.		날짜에서 날짜를 빼면 차이만큼 일수를 리턴<중요>
+
+<61> employee 테이블에서 직원번호, 직원명, 근무일수, 근무개월수, 입사후5개월후날짜(년-월-일), 입사한달의 마지막날짜(년-월-일)
+입사한날짜기준돌아오는일요일날짜(년-월-일) 검색
+단, 근무일수는 소수 2자리에서 반올림할것
+
+select
+	emp_no							"직원번호"
+	, emp_name						"직원명"
+	, trunc(sysdate-hire_date,1)						"근무일수"
+	, months_between(sysdate, hire_date)				"근무개월수"
+	, to_char(add_months(hire_date, 5), 'YYYY-MM-DD' )		"입사후5개월후날짜"
+	, to_char(last_day(hire_date), 'YYYY-MM-DD' )			"입사한달의마지막날짜"
+	, to_char(next_day(hire_date,1) 'YYYY-MM-DD' )			"입사한날짜기준돌아오는일요일날짜"
+from
+	employee				날짜에서 정수를 더하거나 빼면 날짜가 리턴<중요>
+
+<62> employee 테이블에서 직급이 과장인 직원을 검색
+
+select * from employee where jikup = '과장'
+
+<63> employee 테이블에서 직급이 과장이 아닌 직원을 검색
+
+select * from employee where jikup != '과장'
+select * from employee where jikup <> '과장'
+
+<64>  employee 테이블에서 부서번호가 10번이고 직급이 과장인 직원
+
+select * from employee where jikup = '과장' and dep_no = 10
+
+<65>  employee 테이블에서 직급이 과장 또는 부장인 직원
+
+select * from employee where jikup = '과장' or jikup = '부장'
+
+select * from employee where jikup in( '과장', '부장' );
+
+<중요> 컬럼명 in ( '~~~' , '~~~' )--- =과 or의 의미를 같이 가짐
+
+select * from employee where jikup = any('과장', '부장');   ----- any 사용 시 왼쪽에 반드시 = 넣어야 함
+
+<66>  employee 테이블에서 10번, 20번 부서 중 직급이 과장인 직원
+
+select * from employee where (dep_no=10 or dep_no=20) and jikup = '과장';
+
+select * from employee where dep_no in (10,20) and jikup = '과장';
+
+<67> customer 테이블에서 담당직원이 없는 고객을 검색
+
+select * from customer where emp_no is null;
+
+<68> customer 테이블에서 담당직원이 있는 고객을 검색
+
+select * from customer where emp_no is not null;
+
+<69>  customer 테이블에서 담당직원 번호가 9번이 아닌 고객
+
+select * from customer where emp_no != 9 or emp_no is null;
+
+<70> employee 테이블에서 연봉이 3000~4000만원 사이인 직원 검색
+
+select * from employee where salary >= 3000 and salary <= 4000;
+
+select * from employee where salary between 3000 and 4000;
+
+<71> employee 테이블에서 연봉이 3000만원 이상 4000만원 미만 사이인 직원
+
+select * from employee where salary >= 3000 and salary < 4000;
+
+select * from employee where salary between 3000 and 4000 and salary != 4000;
+
+between 왼쪽에 컬럼명!
+
+<72> employee 테이블에서 연봉을 5% 인상했다고 가정하고 3000 이상인 직원을 검색
+
+select * from employee where salary * 1.05 >= 3000;
+
+<73> employee 테이블에서 입사일이 '1995-1-1' 이상인 직원을 검색
+
+select * from employee where hire_date >= to_date('1995-1-1', 'YYYY-MM-DD');
+
+<74> employee 테이블에서 입사일이 1990년~1999년 사이인 직원 검색
+
+select * from employee where hire_date >= to_date('1990-1-1', 'YYYY-MM-DD')
+			   and
+			   hire_date < to_date('2000-1-1', 'YYYY-MM-DD');
+----------------------------------------------------------------------------------------
+select * from employee where
+		to_number( to_char(hire_date, 'YYYY') ) between 1990 and 1999;
+
+<75> employee 테이블에서 부서번호가 10번 또는 30번인 직원 중에 연봉이 3000미만이고 입사일이 '1996-01-01' 미만 직원 검색
+
+select * from employee where
+		dep_no in(10, 30) -- dep_no = any(10, 30) -- (dep_no = 10 or dep_no = 30)
+			and salary < 3000
+				and hire_date<to_date('1996-01-01', 'YYYY-MM-DD');
+
+<76> employee 테이블에서 성이 '김'씨인 직원 검색
+
+select * from employee where substr(emp_name, 1, 1) = '김';
+select * from employee where emp_name like '김%'; ----'김' 이후에는 무엇이든 자유롭게 올 수 있게 함
+---------------------------------------------------------------------------------------------------------------
+where 컬럼명 like '패턴문자열' => 컬럼명 안의 데이터가 패턴문자열을 갖고 있으면 그 행을 검색하라
+emp_name like '김%' => 김이 첫 글자고 두번째는 무엇이 와도 좋고 길이에 제한 없는 문자 패턴을 골라라
+		   => 문자패턴 안의 %는 무엇이 와도 좋고 길이에 제한없음의 의미이다.
+		   => like 왼 쪽이 컬럼명
+
+<77> employee 테이블에서 성이 황씨인 직원 검색
+
+select * from employee where 
+	substr(emp_name, 1, 1) = '황' and substr(emp_name, 1, 2) != '황보';
+---------------------------------------------------------------------------------------------------
+select * from employee where 
+	emp_name like '황%' and emp_name not like '황보%'
+
+<78> employee 테이블에서 이름이 2자인 직원을 검색
+
+select * from employee where length(emp_name)=2;
+----------------------------------------------------------------------------------------------------
+length(컬럼명) => 컬럼명 안의 문자데이터의 길이를 0이상의 정수로 리턴해주는 함수
+
+<79> employee 테이블에서 이름이 김으로 끝나는 직원 검색
+
+elect * from employee where emp_name like '%김';
+elect * from employee where substr(emp_name,length(emp_name),1)='김'
+
+<80> employee 테이블에서 성이 김씨이고 3글자인 직원을 검색
+
+select * from employee where substr(emp_name, 1, 1) = '김' and length(emp_name)=3
+
+select * from employee where emp_name like '김%' and length(emp_name)=3
+
+select * from employee where emp_name like '김__';
+
+<81> employee 테이블에서 이름에 김이란 문자를 가진 직원 검색
+
+select * from employee where emp_name like '%김%'; ---<주의> 중간에 '김'이 있다는 게 아니라 어디에든 '김'이 있다는 뜻이다.
+
+<82> employee 테이블에서 성이 김씨가 아닌 직원
+
+select * from employee where emp_name not like '김%'
+
+<83>  employee 테이블에서 이름 중간에만 김이 들어간 직원
+
+select * from employee where emp_name like '%김%'
+			   and emp_name not like '김%'
+			   and emp_name not like '%김'
+
+<84> employee 테이블에서 여자 직원을 검색
+
+select * from employee where substr(jumin_num,7,1) = '2' or substr(jumin_num,7,1) = '4';
+
+select * from employee where substr(jumin_num,7,1) in ('2', '4');
+
+select * from employee where
+	jumin_num like '______2%' or jumin_num like '______4%'; ---<주의> 언더바 시 언더바 숫자 개수를 정확히 해야 한다.
+
+select * from employee where
+	jumin_num not like '______1%' and jumin_num not like '______3%';
+
+만약 주민번호 중간에 - 가 있다면 아래 처럼해도 된다.
+
+select * from employee where
+	jumin_num like '%-2%' or jumin_num like '%-4%'
+
+<85> employee 테이블에서 1960년대, 1970년대 출생자 중 남자만 검색하라
+---------------------------------------------------------------------------------------------------------------------
+select * from employee where 
+		(substr(jumin_num,1,1)='6' or substr(jumin_num,1,1)='7') and substr(jumin_num,7,1)='1';
+---------------------------------------------------------------------------------------------------------------------
+select * from employee where 
+		substr(jumin_num,1,1) in (6,7) and substr(jumin_num,7,1)='1';
+---------------------------------------------------------------------------------------------------------------------
+select * from employee where
+	jumin_num like '6_____1%' or jumin_num like '7_____1%'; 
+---------------------------------------------------------------------------------------------------------------------
+
+<86> 직원번호, 직원명, 소속부서명, 
+
+select
+	e.emp_no			"직원번호"
+	,e.emp_name			"직원명"
+	,d.dep_name			"소속부서명"
+from
+	employee e, dept d
+where	
+	e.dep_no=d.dep_no
+
+join -- 두개이상의 테이블에서 컬럼을 복사해서 횡으로 붙이는 작업<연관성있게 붙여서 작업>
+
+<87> 고객번호, 고객명, 고객담당직원이름 검색
+
+select
+	c.cus_no				"고객번호"
+	,c.cus_name			"고객명"
+	,e.emp_name			"고객담당직원이름"
+from
+	customer c, employee e
+where
+	c.emp_no=e.emp_no
+---------------------------------------------------------------------------------------------------
+
+select
+	c.cus_no				"고객번호"
+	,c.cus_name			"고객명"
+	,e.emp_name			"고객담당직원이름"
+from
+	customer c, employee e
+where
+	c.emp_no=e.emp_no(+) --- 딸려나오는 테이블에 나오는 컬럼 오른쪽에 붙음 
+				조건에 해당하지 않는 null값 데이터도 끌고와서 검색
+
+
+<88> 평균 연봉보다 많이 받는 직원 검색
+
+select * from employee where salary >= (select avg(salary) from employee)
+
+비 상관 커리
+select 문 안에 select 문을 다시 넣음
+
+<89> 직급별, 평균 연봉 검색
+
+select
+	jikup
+	,avg(salary)
+from
+	employee
+group by
+	jikup
+
+
+기본적으로 null값을 제외하고 검색하므로 null값 포함하기 위해서 추가적으로 null함수를 추가한다
+
+날짜 함수 정리( 리턴값의 자료형을 조심할것 )
+----------------------------------------------------------------------------------------------------------------------
+months_between(날짜1, 날짜2) =>날짜1 과 날짜2 의 차이를 개월수로 리턴하기
+----------------------------------------------------------------------------------------------------------------------
+add_months(날짜,개월수)	   =>날짜에 개월수 만큼 더한 날의 날짜를 리턴하기
+----------------------------------------------------------------------------------------------------------------------
+last_day(날짜)		   =>날짜가 속한 달의 마지막 날짜를 리턴하기
+----------------------------------------------------------------------------------------------------------------------
+next_day(날짜, 요일정수)	   =>날짜 기준으로 돌아오는 요일의 날짜를 리턴하기
+			       요일 정수는 1~7(일~토)
+----------------------------------------------------------------------------------------------------------------------
+날짜1-날짜2		   =>날짜1 과 날짜2 의 차이를 일수로 리턴하기
+----------------------------------------------------------------------------------------------------------------------
+날짜+정수		   =>날짜에다 정수만큼의 일수를 더한 만큼의 날의 날짜를 리턴하기
+----------------------------------------------------------------------------------------------------------------------
+날짜-정수			   =>날짜에다 정수만큼의 일수를 뺀 만큼의 날의 날짜를 리턴하기
+
+
+----------------------------------------------------------------------------------------------------------------------
+round(숫자저장컬럼명, 반올림한 후 보여지는 자릿수) => round(susdate-hire_date,1)
+						소수2자리에서 반올림한 결과 리턴
+----------------------------------------------------------------------------------------------------------------------
+trunc(숫자저장컬럼명, 버린 후 보여지는 자릿수) => trunc(susdate-hire_date,1)
+						소수2자리 이후 모두 버리고 리턴
+----------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+Xxx x = new 
+
+? y =x.abc(); (입) 상속관계에서 봤을때 최상위에 object가 있으므로 
+
+에러 = abc리턴 값이 void = 리턴 값이 없단 뜻
+
+
+
 
 
 올해 생일을 찍는 경우 생일이 지금 이 시간보다 이후면 올해 생일 찍어야, 지금 이 시간보다 이전이면 내년 생일을 찍어야
@@ -1373,6 +1674,18 @@ default 가 걸리면 대부분 not null 이다.
 운영체제에 설치되는 소프트웨어가 통신을 목적으로 운영체제로부터 부여받는 통신번호
 
 	'20211225' - '20210611' --> XX
+
+
+★
+문자함수류들은 우선적으로 외워둘 것
+
+
+
+
+★
+둥근 괄호의 활용
+먼저 사용될 구문 나눌 때
+복잡한 식의 구분
 
 
 ★

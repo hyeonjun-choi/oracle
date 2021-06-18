@@ -314,7 +314,7 @@ from
 
 
 
-
+select * from employee where jikup = '대리'
 
 
 select
@@ -366,18 +366,113 @@ employee;
 
 -- employee 테이블에서 수요일에 태어난 직원을 검색
 
-select * from employee;
-where , to_char(
+
+select * from employee
+where to_char(
 		to_date(
-			case when substr ( jumin_num,7,1 ) in('1', '2' ) then '19' else '20' end
-				 ||substr(jumin_num,1,6)
-				, 'YYYYMMDD' )
-				, 'DY', 'nls_date_language = Korean')= '수요일'
+			decode( substr( jumin_num,7,1), '1' , '19' , '2' , '19' , '20' ) || substr( jumin_num,1,6 ), 'YYYYMMDD' )
+		,'DAY'
+		,'nls_date_language = Korean') = '수요일'
+
+
+select * from employee
+	where
+		substr( jumin_num, 1, 1) = '7'
+		and
+		substr( jumin_num, 7, 1) = '1'
+
+select * from employee
+	where
+		(substr( jumin_num, 1, 1) = '6' or substr( jumin_num, 1, 1) = '7')
+		and
+		(substr( jumin_num, 7, 1) = '1' or substr( jumin_num, 7, 1) = '3')
+
+select * from employee order by
+	to_number(sysdate - hire_date) desc;
+
+select * from employee order by
+	(sysdate - hire_date) desc;
+
+select
+	emp_no					as		"직원번호"
+	, emp_name				as		"직원명"
+	, sysdate-hire_date				as		"근무일수"
+	, months_between(sysdate, hire_date)		as		"근무개월수"
+	, to_char(add_months(hire_date, 5), 'YYYY-MM-DD' )	as	"입사후5개월후날짜"
+	, to_char(last_day(hire_date), 'YYYY-MM-DD' )		as	"입사한달의마지막날짜"
+	, to_char(next_day(hire_date,1) 'YYYY-MM-DD' )		as	"입사한날짜기준돌아오는일요일날짜"
+from
+	employee
+
+
+select * from employee where
+		dep_no in(10, 30)
+			and salary < 3000
+				and hire_date<to_date('1996-01-01', 'YYYY-MM-DD');
+
+
+select * from employee where substr(emp_name, 1, 1) = '김'
+
+select * from employee where substr(emp_name, 1, 1) = '황'
+
+
+select * from employee where jikup = '과장' or jikup = '부장'
+
+select * from employee where jikup in( '과장', '부장' );
+
+select * from employee where jikup = any('과장', '부장');
+
+
+
+
+select * from employee where (dep_no=10 or dep_no=20) and jikup = '과장';
+
+
+select * from employee where (dep_no=10 or dep_no=20) and jikup = '과장';
+
 
 select * from employee
 	floor( ( to_number( case substr( jumin_num,7,1) when '1' then'19' when '2' then '19' else '20' end
 	|| substr(jumin_num,1,2) )+ 1)*0.1)||'0대'
 	and decode( substr(jumin_num,7,1),'1','남','3','남','여')end = '70년대생 남자 직원'
+
+select * from employee where hire_date >= to_date('1995-1-1', 'YYYY-MM-DD');
+
+select * from employee where substr(emp_name, 1, 1) = '김' and length(emp_name)=3
+
+select * from employee where emp_name like '김%' and length(emp_name)=3
+
+select * from employee where emp_name not like '김%' and '%김' else
+
+
+
+select
+	employee.emp_no
+	,employee.emp_name
+	,dept.dep_name
+from
+	employee, dept
+where
+	employee.dep_no=dept.dep_no
+
+select
+	c.cus_no				"고객번호"
+	,c.cus_name			"고객명"
+	,e.emp_name			"고객담당직원이름"
+from
+	customer c, employee e
+where
+	c.emp_no=e.emp_no
+
+
+select
+	c.cus_no				"고객번호"
+	,c.cus_name			"고객명"
+	,e.emp_name			"고객담당직원이름"
+from
+	customer c, employee e
+where
+	c.emp_no=e.emp_no(+)
 
 
 
@@ -446,6 +541,10 @@ create table customer (
 
 
 select * from customer;
+
+
+select * from customer where emp_no != 9 or emp_no is null;
+
 
 insert into customer values( cus_sq.nextval, '류민이', '123-1234', '7001131537915', 3);insert into customer values( cus_sq.nextval, '이강민', '343-1454', '6902161627914', 2);insert into customer values( cus_sq.nextval, '이영희', '144-1655', '7503202636215', null);insert into customer values( cus_sq.nextval, '김철이', '673-1674', '7704301234567', 4);insert into customer values( cus_sq.nextval, '박류완', '123-1674', '7205211123675', 3);insert into customer values( cus_sq.nextval, '서캔디', '673-1764', '6507252534566', null);insert into customer values( cus_sq.nextval, '신똘이', '176-7677', '0006083648614', 7);insert into customer values( cus_sq.nextval, '도쇠돌', '673-6774', '0008041346574', 9);insert into customer values( cus_sq.nextval, '권홍이', '767-1234', '7312251234689', 13);insert into customer values( cus_sq.nextval, '김안나', '767-1677', '7510152432168', 4);
 
