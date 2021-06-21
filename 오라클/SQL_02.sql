@@ -466,13 +466,157 @@ where
 
 
 select
-	c.cus_no				"고객번호"
-	,c.cus_name			"고객명"
-	,e.emp_name			"고객담당직원이름"
+	employee.emp_no			"직원번호"
+	,employee.emp_name			"직원명"
+	,dept.dep_name			"소속부서명"
+from
+	employee, dept
+where
+	employee.dep_no=dept.dep_no
+
+select
+	d.dep_name	"직원부서명"
+	, e.emp_name	"직원명"
+	, e.jikup		"직원직급"
+	, c.cus_name	"담당고객명"
+	, c.tel_num	"고객전화번호"
+from
+	employee e, dept d, customer c
+where
+	c.emp_no=e.emp_no and e.emp_no=c.emp_no
+order by
+	e.emp_name asc;
+
+select
+	e1.emp_name
+	, e1.jikup
+	, e2.emp_name
+	, e2.jikup
+from
+	employee e1, employee e2
+where
+	e1.mgr_emp_no=e2.emp_no
+
+select
+	c.cus_name		"고객명"
+	, c.tel_num		"고객전화번호"
+	, e.emp_name		"담당직원명"
+	, e.jikup			"담당직원직급"
 from
 	customer c, employee e
 where
-	c.emp_no=e.emp_no(+)
+	c.emp_no=e.emp_no
+
+
+select
+	e1.emp_name
+	, e1.jikup
+	, d.dep_name
+	, s.sal_grade
+	, e2.emp_name
+	, e2.jikup
+	, c.cus_name
+from
+	employee1 e1, employee2 e2, dept d, salary_s, customer c
+where
+	e1.mgr_emp_no=e2.emp_no and e.dep_no=d.dep_no and (e.salary between s.min_salary and s.max_salary);
+
+
+select
+	e1.emp_name		"직원명"
+	, e1.jikup			"직원직급"
+	, d.dep_name		"소속부서명"
+	, s.sal_grade_no		"연봉등급"
+	, e2.emp_name		"직속상관명"
+	, e2.jikup			"직속상관직급"
+	, c.cus_name		"고객명"
+from
+	employee1 e1, dept d, salary_grade s, employee e2, customer c
+where
+	e1.dep_no=d.dep_no
+	and (e1.salary>=s.min_sal and e1.salary<=s.max_sal)
+	and e2.emp_no=e1.mgr_emp_no
+	and e1.emp_no=c.emp_no;
+
+
+
+select
+	e1.emp_name		"직원명"
+	, e1.jikup			"직원직급"
+	, d.dep_name		"소속부서명"
+	, s.sal_grade_no		"연봉등급"
+	, e2.emp_name		"직속상관명"
+	, e2.jikup			"직속상관직급"
+	, c.cus_name		"고객명"
+from
+	(((employee e inner join dept d
+	on e.dep_no = d.dep_no) inner join salary_grade s
+	on e.salary between s.min_salary and s.max_salary) inner join employee e2
+	on e.mgr_emp_no = e2.emp_no) inner join customer c
+	on c.emp_no = e.emp_no
+
+
+select
+	c.cus_name		"고객명"
+	, c.tel_num		"고객전화번호"
+	, e.emp_name		"담당직원명"
+	, e.jikup			"담당직원직급"
+	, e.dep_no		"부서번호"
+from
+	customer c, employee e
+where
+	c.emp_no=e.emp_no(+) -- 딸려 나오는 테이블 뒤에다가
+
+select
+	c.cus_no
+	, c.cus_name
+	, c.tel_num
+	, e.emp_name
+	, e.jikup
+	, e.dep_no
+from
+	customer c, employee e
+where
+	c.emp_no = e.emp_no(+) and e.dep_no(+)=10
+
+select 	c.cus_no		"고객번호"
+	, c.cus_name
+	, c.tel_num
+	, e.emp_name
+	, e.jikup
+	, s.sal_grade_no
+from
+	customer c, employee e, salary_grade s
+where
+	c.emp_no = e.emp_no(+)
+	and
+	s.min_salary(+)<=e.salary
+	and
+	s.max_salary(+)>=e.salary
+
+select
+	c.cus_no
+	, c.cus_name
+	, c.tel_num
+from
+	customer c, employee e
+where
+	e.salary>=3000 and e.emp_no<=c.emp_no
+order by
+
+
+select
+	c.cus_no
+	, c.cus_name
+	, c.jumin_num
+from
+	customer c, employee e
+where
+	c.emp_no=e.emp_no
+	and
+	( extract( year from sysdate ) - extract( year from to_date
+	( decode( substr( e.jumin_num,7,1), '1', '19', '2', '19', '20') || substr(e.jumin_num,1,6), 'YYYYMMDD') )+1 ) >=40
+
 
 
 
