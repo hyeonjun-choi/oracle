@@ -617,6 +617,44 @@ where
 	( extract( year from sysdate ) - extract( year from to_date
 	( decode( substr( e.jumin_num,7,1), '1', '19', '2', '19', '20') || substr(e.jumin_num,1,6), 'YYYYMMDD') )+1 ) >=40
 
+select
+	e.emp_no
+	, e.emp_name
+	, e.jikup
+from
+	employee e
+where
+	(select count(*) from customer c where e.emp_no = c.emp_no)>=2;
+
+
+select
+	e.emp_no		"직원번호"
+	, e.emp_name		"직원명"
+	, d.dep_name		"부서명"
+from
+	employee e, dept d
+where
+	e.dep_no=d.dep_no;
+
+
+
+
+select
+	e.emp_no						"직원번호"
+	, e.emp_name						"직원명"
+	, (select d.dep_name from dept d where d.dep_no=e.dep_no)	"부서명"
+from
+	employee e;
+
+
+select
+	e1.emp_no						"직원번호"
+	, e1.emp_name						"직원명"
+	, e1.salary						"연봉"
+	, (select count(*)+1	 from employee e2 where e2.salary>e1.salary)	"연봉순위"
+from
+	employee e1
+order by 4;
 
 
 
@@ -729,3 +767,21 @@ select
 	to_date('20210512', 'YYYYMMDD')
 from
 	dual;
+
+
+
+update employee set dep_no=40 where emp_no=2;
+
+commit;
+
+select
+	c.cus_no
+	, c.cus_name
+	, c.tel_num
+	, e.emp_name
+	, e.jikup
+	, e.dep_no
+from
+	customer c left outer join employee e
+where
+	(c.emp_no = e.emp_no) and e.dep_no=10;
