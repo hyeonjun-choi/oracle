@@ -626,6 +626,22 @@ from
 where
 	(select count(*) from customer c where e.emp_no = c.emp_no)>=2;
 
+select 	c.cus_no			"고객번호"
+	, c.cus_name		"고객명"
+	, c.tel_num		"고객전화번호"
+	, e.emp_name		"담당직원명"
+	, e.jikup			"담당직원직급"
+	, s.sal_grade_no		"담당직원연봉등급"
+from
+	customer c, employee e, salary_grade s
+where
+	c.emp_no = e.emp_no(+)
+	and
+	s.min_salary(+)<=e.salary
+	and
+	s.max_salary(+)>=e.salary
+
+
 
 select
 	e.emp_no		"직원번호"
@@ -655,6 +671,75 @@ select
 from
 	employee e1
 order by 4;
+
+select
+	e1.emp_no
+	, e1.emp_name
+	, e1.jikup
+	, e1.jumin_number
+	, ( select count(*)+1 from employee e2
+		where
+		decode(e2.jikup, '사장', 1, '부장', 2, '과장', 3, '대리', 4, '주임', 5, 6)
+		< decode(e1.jikup, '사장', 1, '부장', 2, '과장', 3, '대리', 4, '주임', 5, 6)
+	or
+	( e2.jikup=e1.jikup and
+	decode(substr(e2.jumin_num,7,1),'1', '19', '2', '19', '20') || substr(e2.jumin_num,6,1)
+	<
+	decode(substr(e1.jumin_num,7,1),'1', '19', '2', '19', '20') || substr(e1.jumin_num,6,1)
+	)
+from
+	employee e1
+order by 5;
+
+
+select
+	c.cus_no            "고객번호"
+	, c.cus_name        "고객이름"
+	, c.tel_num         "고객전화번호"
+	, (select e.emp_name from employee e where c.emp_no=e.emp_no and e.dep_no=10)          "담당직원명"
+	, (select e.jikup from employee e where c.emp_no=e.emp_no and e.dep_no=10)             "담당직원직급"
+	, (select e.dep_no from employee e where c.emp_no=e.emp_no and e.dep_no=10)            "부서번호"
+from
+	customer c;
+
+select
+	dep_no						"부서번호"
+	, decode( substr( jumin_num,7,1),'1','남','3','남','여')	"성"
+	, sum(salary)					"급여합"
+	, round(avg(salary),1)				"평균급여"
+	, count(*)						"인원수"
+from employee
+group by
+	dep_no, jumin_num
+
+
+
+select
+	hire_date        "입사년도"
+	, count(*)       "인원수"
+from
+	employee
+group by
+	hire_date
+order by 1
+
+
+select
+	to_char(hire_date, 'YYYY' ) 	"입사년도"
+	, count(*)			"인원수"
+from
+	employee
+group by
+	to_char(hire_date, 'YYYY' )
+order by
+	"입사년도" asc;
+
+select
+	dep_no							"부서번호"
+	, round(       avg( (sysdate-hire_date)/365 ) , 1) || '년'	"평균근무년수"
+from employee
+group by dep_no;
+
 
 
 
