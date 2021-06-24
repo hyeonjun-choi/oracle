@@ -158,6 +158,8 @@ select
 from
 		employee;
 
+
+
 select
 		cus_no
 		, cus_name
@@ -168,12 +170,15 @@ from
 		customer;
 
 
+
 select
 	cus_no
 	, cus_name
 	, nvl(emp_no||'','없음')
 from
 	customer;
+
+
 
 select
 	emp_no
@@ -184,6 +189,8 @@ select
 	end
 from
 	employee;
+
+
 
 select
 	emp_no
@@ -197,6 +204,8 @@ select
 	end
 from
 	employee;
+
+
 
  select
 	emp_no
@@ -740,6 +749,92 @@ select
 from employee
 group by dep_no;
 
+
+select
+	jikup			"직급"
+	, round(avg(salary), 1) 	"직급평균연봉"
+	, count(*)			"인원수"
+from
+	employee
+group by		jikup
+
+
+
+select
+	jikup			"직급"
+	, round(avg(salary), 1) 	"직급평균연봉"
+	, count(*)			"인원수"
+from
+	employee
+group by		jikup
+order by
+	decode(jikup, '사장', 1, '부장', 2, '과장', 3, '대리', 4, '주임', 5, 6) asc;
+
+select
+	d.dep_no			    		"부서번호"
+	, d.dep_name			    	"부서명"
+	, count(distinct e.emp_no)				"직원수"
+	, count(c.emp_no)				"직원이관리하는고객수"
+from	dept d, employee e, customer c
+where	d.dep_no=e.dep_no(+) and c.emp_no(+)=e.emp_no
+group by
+	d.dep_no, d.dep_name;
+
+
+
+select
+	e1.emp_no                                                                                "[직원번호]"
+	, e1.emp_name                                                                            "[직원명]"
+	, ceil((sysdate-e1.hire_date)/365)                                                       "[근무년차]"
+	, to_number(to_char(sysdate,'yyyy'))-to_number((case substr(e1.jumin_num,7,1)
+		when '1' then '19' when '2' then '19'else '20'end)||substr(e1.jumin_num,1,2))+1  "[나이]"
+	, 60-(to_number(to_char(sysdate,'yyyy'))-to_number((case substr(e1.jumin_num,7,1)
+		when '1' then '19' when '2' then '19'else '20'end)||substr(e1.jumin_num,1,2))+1) "[퇴직년도까지]"
+	, to_char(to_date(case substr(e1.jumin_num,7,1)
+		when '1' then '19' when '2' then '19' else '20' end
+			||substr(e1.jumin_num,1,6),'yyyymmdd'),'yyyy-mm-dd')||' '
+			||to_char(to_date(case substr(e1.jumin_num,7,1)
+				when '1' then '19' when '2' then '19' else '20' end
+			||substr(e1.jumin_num,1,6),'yyyymmdd'),'dy','nls_date_language = korean') "[생일]"
+	, e1.jikup                                                                                "[직급]"
+	, d1.dep_name                                                                             "[소속부서명]"
+    , e2.emp_name                                                                             "[직속상관명]"
+    , d2.dep_name                                                                             "[직속상관소속부서명]"
+from
+    employee e1, dept d1,employee e2, dept d2
+where
+    e1.dep_no  = d1.dep_no(+) and e1.mgr_emp_no = e2.emp_no(+) and e2.dep_no = d2.dep_no(+)
+order by
+    decode(e1.jikup ,'사장',1 ,'부장',2 ,'과장',3 ,'대리',4 ,5)
+    , case substr(e1.jumin_num,7,1)  when '1' then '19' when '2' then '19' else '20' end ||substr(e1.jumin_num,1,6)
+
+
+
+
+select
+    e1.emp_no "[직원번호]"
+    ,e1.emp_name "[직원명]"
+    ,ceil((sysdate-e1.hire_date)/365)||'년' "[근무년차]"
+    ,to_number(to_char(sysdate,'yyyy'))-to_number((case substr(e1.jumin_num,7,1)
+        when '1' then '19' when '2' then '19'else '20'end)||substr(e1.jumin_num,1,2))+1||'살' "[나이]"
+    ,60-(to_number(to_char(sysdate,'yyyy'))-to_number((case substr(e1.jumin_num,7,1)
+        when '1' then '19' when '2' then '19'else '20'end)||substr(e1.jumin_num,1,2))+1)||'년' "[남은 퇴직년도]"
+    ,to_char(to_date(case substr(e1.jumin_num,7,1)
+            when '1' then '19' when '2' then '19'else '20'end
+                ||substr(e1.jumin_num,1,6),'yyyymmdd'),'yyyy-mm-dd')||' '
+                ||to_char(to_date(case substr(e1.jumin_num,7,1)
+                        when '1' then '19' when '2' then '19'else '20'end
+                ||substr(e1.jumin_num,1,6),'yyyymmdd'),'dy','nls_date_language = korean') "생일"
+    ,e1.jikup    "[직급]"
+    ,(select d.dep_name from dept d where d.dep_no=e1.dep_no) "[소속부서명]"
+    ,nvl((select e2.emp_name from employee e2 where e1.mgr_emp_no=e2.emp_no),'없음')   "[직속상관명]"
+    ,nvl((select d.dep_name from employee e2, dept d
+            where d.dep_no=e2.dep_no and e1.mgr_emp_no=e2.emp_no)||'','없음')    "[직속상관부서명]"
+    ,(select nvl(count(*), 0) from customer c  where c.emp_no=e1.emp_no) "[담당고객수]"
+from employee e1
+order by
+    decode(e1.jikup ,'사장',1 ,'부장',2 ,'과장',3 ,'대리',4 ,5)
+    , case substr(e1.jumin_num,7,1)  when '1' then '19' when '2' then '19' else '20' end ||substr(e1.jumin_num,1,6)
 
 
 

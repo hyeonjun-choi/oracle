@@ -1201,7 +1201,7 @@ where to_char(
 
 
 ----------------------------------------------------------------------------------------------------------------------------
-<57> 오라클의 자주 사용되는 숫자함수 예를 보여주시오
+<57> 오라클의 자주 사용되는 숫자함수 예를 보여주시오  ★★★★★★★★★
 
 abs( n ) - 숫자 n의 절대값을 반환
 
@@ -1569,7 +1569,7 @@ on
 	c.emp_no=e.emp_no
 ----------------------------------------------------------------------------
 
-(시험 및 면접에서) 조인할 수 있는 테이블의 갯수? 갯수는 상관없다 <함정주의>
+(시험 및 면접에서) 조인할 수 있는 테이블의 개수? 개수는 상관없다 <함정주의>
 
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 <92> 고객명, 고객전화번호, 담당직원명, 담당직원직급 을 출력 <조건> 10번 부서의 담당직원이 있는 고객만 출력
@@ -2574,8 +2574,10 @@ select
 	, count(*)					"입사인원수"
 from
 	employee
-group by to_char(hire_date, 'MM') || '월'
-order by "입사월" asc;	
+group by 
+	to_char(hire_date, 'MM') || '월'
+order by 
+	"입사월" asc;	
 
 
 
@@ -2588,39 +2590,103 @@ select
 	jikup			"직급"
 	, round(avg(salary), 1) 	"직급평균연봉"
 	, count(*)			"인원수"
-from
-	employee
+from		employee
+(where		~~~~)
 group by		jikup
+having 		count(*)>=5
 order by	
-	case jikup when '사장' then 1 when '	
+	decode(jikup, '사장', 1, '부장', 2, '과장', 3, '대리', 4, '주임', 5, 6) asc;
+decode("직급", '사장', 1, '부장', 2, '과장', 3, '대리', 4, '주임', 5, 6) asc;
 
+★ * 나오면 그룹 지으란 뜻 -- 예외 존재
+중복된 직급 제거
+직급별로 평균연봉 갯수
+order 사용 시 오라클이 인식하지 못하는 순서관계를 출력해야 할 경우 작성자가 직접 특정 구문(ex, decode, case when 등)
+을 사용하여 정렬기준을 새로 잡아주어야 함.
+order by는 항상 맨 밑으로 위치시켜야
+알리아스'별칭'은 오더 뒤에
+
+소수점 컨트롤
+보고싶은 자리수 기준
+그룹 바이에서 나온 결과물에서 '행'을 골라내는 것
+가공된 컬럼의 경우 그대로 붙여서 사용
+
+■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+<136> 부서별 [부서번호], [부서명], [직원수], [직원이 관리하는 고객수] 검색
+■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+select
+	d,dep_no					"부서번호"
+	, d.dep_name				"부서명"
+	, count(distinct e.emp_no)				"직원수"
+	, count(c.emp_no)				"직원이 관리하는 고객수" 
+from	dept d, employee e, customer c
+where	d.dep_no=e.dep_no(+) and c.emp_no(+)=e.emp_no
+group by
+	d,dep_no, d.dep_name
+
+
+'부서별'이란 말은 있는데 --- 직원이 없는 부서가 있을 수 있음 --- 이것을 다 포함해서 통계를 내야 함
+--- 문제 속에 outer join을 하라는 뜻이 담겨 있음
+단일칼람 - 그룹을 있어야 
+
+count(c.emp_no)에  distinct 쓰면 고객 담당하는 직원수 된다
+
+count(distinct e.emp_no) 에 distinct 안하면 직원수 중복된다
+
+select
+	d,dep_no												"부서번호"
+	, d.dep_name											"부서명"
+	, (select count(*) || '명' from employee e where e.dep_no=d.dep_no) 					"부서직원수"
+	, (select count(*) || '명' from employee e, customer c where e.dep_no=d.dep_no and e.emp_no=c.emp_no) 	"담당고객수"
+from dept d;
 
 
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
-<136> 부서별 [부서번호], [부서명], [직원수], [관리고객수] 검색
-■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
-
-
-
-
-■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
-<137> 퇴직일이 60세 라는 기준 하에 아래처럼 출력하라
+<137> 퇴직일이 60세 라는 기준 하에 아래처럼 출력하라  <중요도 ★★★★★★★★★★ >
 [직원번호], [직원명], [근무년차], [퇴직일까지 남은 년도], [생일(년-월-일 요일명)], [소속부서명], [직속상관명], [직속상관 부서명]
+----------------------------------------------------------------------------------- -------------  -------------  ------------------
+				employee e1			     dept d1    employee e2      dept d2
+				    메인 <<-------------------------------------		   |   <<-----------		
+					<<-------------------------------------------------  |					
 단 모든 직원 다 나오고, 직급 높은 사람 먼저 나오고 직급 같으면 나이가 많은 사람이 나와야 함.
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 
+select
+	e1.emp_no									"직원번호"
+	, e1.emp_name									"직원명"
+	, ceil((sysdate-e1.hire_date)/365)  -- 구한 후 소수점을 무조건 올림하기 위해 ceil 사용.		"근무년차"
+	, to_number(to_char(sysdate,'YYYY'))  -- 현재 이시각 년도
+	-to_number((case substr(e1.jumin_num,7,1)
+	when '1' then '19' when '2' then '19'else '20'end)
+	||substr(e1.jumin_num,1,2))+1 -- 출생년도						"나이"
+	, 60-(to_number(to_char(sysdate,'YYYY')) -- 퇴직일에서 ~~~ 빼기
+	-to_number((case substr(e1.jumin_num,7,1)
+	when '1' then '19' when '2' then '19'else '20'end)
+	||substr(e1.jumin_num,1,2))+1								"퇴직일까지남은년도"
+	, to_char(to_date(case substr(e1.jumin_num,7,1) 
+		when '1' then '19' when '2' then '19' else '20' end
+			||substr(e1.jumin_num,1,6),'yyyymmdd'),'yyyy-mm-dd')||' '	
+			||to_char(to_date(case substr(e1.jumin_num,7,1) 
+				when '1' then '19' when '2' then '19' else '20' end
+			||substr(e1.jumin_num,1,6),'yyyymmdd'),'dy','nls_date_language = korean')	"생일"
+	,e1.jikup       									"직급"
+	,d1.dep_name 									"소속부서명"
+	,e2.emp_name  									"직속상관명"
+	,d2.dep_name   									"직속상관소속부서명"
+from	
+	employee e1, dept d1, employee e2, dept d2
+where	
+	e1.dep_no = d1.dep_no(+)
+	and
+	e1.mgr_emp_no = e2.emp_no(+)
+	and
+	e2.dep_no = d2.dep_no(+)
+order by
+	decode(e1.jikup, '사장', 1, '부장', 2, '과장', 3, '대리', 4, 5) asc
+	, case substr(e1.jumin_num,7,1) when '1' then '19' when '2' then '19' else '20' end || substr(e1.jumin_num,1,6) asc
 
 
-
-
-
-
-
-
-
-
-
-
+어려울 땐 일단 한글로 쳐서 본 다음에 차근차근 코딩해 보기
 <제외>
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 <138> 오늘부터 10일 이후까지 날짜 중에 토요일, 일요일, 월요일을 제외한 날의 개수르 구하면?
