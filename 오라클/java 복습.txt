@@ -1,0 +1,161 @@
+pulbic class Test {
+	public static void( String[] srgs ) {
+		int a = 10, c= 0;
+		long b = 30;
+		c=a+b; -- 왼쪽 부분은 변수, 오른쪽 부분은 데이터
+		System.out.println( c );
+	}
+}
+
+정답 : error 터짐 (이유 : )
+
+public class Test {
+	public static void main( String[] args ) {
+		int a=1, b=5, c=3;
+		c=++a + b++;
+		//c += b;
+		System.out.println( c );
+	}
+}
+
+++n == 먼저 증감 시키고 데이터 입력
+n++ == 먼저 데이터 입히고 늦게 증감 시킴
+
+정답 : 7
+
+public class Test {
+	public static void main(String[] args ) {
+		int a = 3;
+		if( a-->4 )
+		a++;
+		if( ++a>7 )
+		++a;
+		else
+		a=++a + a++;
+		System.out.println( a );
+	}
+}
+
+정답 : 8
+
+public class Test {
+	public static void main( String[] args ) {
+		int a = 2;
+		switch( a ) {
+		case 1 : a++;
+		case 2 : a++; break;
+		case 3 : a++;
+	}
+	System.out.println(a);
+	}
+}
+
+정답 : 3
+
+증감연산자는 혼자 쓰일땐 왼쪽 오른쪽 상관없음
+
+break가 없을 경우 case 트루 폴스 상관없이 다음 break 나오기 전까지 계속 내려가면서 진행됨 
+(반복문 3개와 스위치 문의 강제차단자)
+ 
+public class Test {
+	public static void main( String[] args ) {
+		int b=1, c=0;
+		for( int a=2 ; a<5; a++) {
+		if( c++>b ) { b=a+c }
+		}
+		System.out.println(a+b+c);
+	}
+}
+
+정답 : error
+
+반복문 안에 선언된 변수a는 반복문이 끝나면 사라지게 된다. 지역변수 특징 지님
+(지역 안에 선언된 변수는 지역 벗아면 존재하지 않는다)
+
+반복문 이후에 코딩에서 a변수가 등장할 수 없음
+
+
+public class Test {
+	public static void main( String[] args ) {
+		int a = 0, b = 5;
+		jump : for( ; ; a++ ) {		-- jump : 단순한 별칭 -- 안에 조건문이 없으면 무한반복 상태로 안으로 들어감
+			for( ; ; --b ) {		-- 역시 무한반복 상태로 안으로 들어감
+			if( a>b ) break jump;	-- 중요 : 한칸만 위로 올라가서 반복하게 됨.
+			}
+		}
+		System.out.println( a+b );
+	}
+}
+
+정답 : -1
+
+public class Test {
+	public static void main( String[] args ) {
+	int a =1, b = 5;
+	jump : for( ; ; ) {
+	a++;
+	for( ; ; ) {
+		if( a>--b ) break jump;
+		}
+		}
+	System.out.println( a + b );
+	}
+}
+
+정답 : 3
+
+
+public class Test {
+	public static void main( String[] args ) {
+		int a = 0, b =5;
+		outer : for( a=0;a<5;a++ ) {
+		inner : for( b=0;b<5;b++ ) {
+			if(a==1&&b==0) { break outer; }
+			if(a==2&&b==1) {continue inner; }
+			}
+		}
+		System.out.println( a+b );
+	}
+}
+
+정답 1
+
+
+continue : 건너띄고 싶을때
+
+public class Test {
+	public static void main( String[] args ) {
+		int a = 0;
+		while( a=1 ) {	-- while 구문 안에 관계연산자를 넣어야 함.
+		if(a == 3)
+		break;
+		a++;
+		}
+	System.out.println( a );
+	}
+}
+
+정답: 오류 
+
+public class Test {
+	public static void main( String[] args ) {
+		int a = 1, b = 0;
+		do {
+		if (a++ > --b) continue;
+		} while( a<5 );
+		System.out.println( a + b );
+	}
+}
+
+정답 : 1
+
+
+
+
+
+
+
+
+
+
+

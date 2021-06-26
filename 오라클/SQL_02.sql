@@ -983,3 +983,20 @@ order by
 	, decode(e.jikup, '사장', 1, '부장', 2, '과장', 3, '대리', 4, '주임', 5, 6 ) asc;
 	, case when substr( e.jumin_num,7,1) in ('1', '2') then '19' else '20' end
 	|| substr(e.jumin_num,1,6)) asc;    -- 물어보기
+
+
+
+select
+	emp_no
+	, emp_name
+	, to_char(hire_date,'YYYY')||'년'
+		|| to_char(hire_date, 'MM')||'월'
+		|| to_char(hire_date, 'DD') ||'일'
+		|| to_char(hire_date, '(DY)', 'nls_date_language = Korean')
+		|| to_char(hire_date, 'Q' ) || '분기'
+		|| to_char(hire_date, 'AM HH' ) || '시'
+		|| to_char(hire_date, ' :MI' ) || '분'
+		|| to_char(hire_date, ' :SS' ) || '초'
+from
+	employee;
+
