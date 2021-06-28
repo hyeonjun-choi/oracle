@@ -2829,7 +2829,7 @@ order by 가 있을 경우 정렬된 후에 rownum 컬럼이 붙는 게 아니�
 		where rownum>1(X)	
 		where rownum=2(X)
 		where rownum>=1 and rownum<=3 (O)
-		where rownum>=2 and rownum<=3 (O)
+		where rownum>=2 and rownum<=3 (X)
 ------------------------------------------------------------------------------------------------------------
 인라인 뷰, 즉 from 절에 나오는 select는 바깥쪽 select 입장에서는 테이블처럼 생각한다.
 인라인 뷰 안에 rownum 컬럼이 있다면 바깥쪽 select 입장에서 안쪽 rownum 컬럼은 단순한 일반 컬럼이 된다.
@@ -2902,6 +2902,16 @@ where
 	and to_char( d.xday, 'dy', 'nls_date_language = korean')!='일'
 	and to_char( d.xday, 'dy', 'nls_date_language = korean')!='월'
 
+select count(*) from ( select 컬럼 "대문자 별칭 컬럼" from dual
+	union select 컬럼+1 from dual(가상테이블)
+	union select 컬럼+2 from dual(가상테이블)
+	.
+	.
+	.
+	union select 컬럼+n from dual(가상테이블)
+) d
+where
+	요구되는 함수 구문 식 and and ~~
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 <142> 이번달 중에 토요일, 일요일을 제외한 날의 개수를 구하면? = 이번달 평일 수 구하기
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■

@@ -1105,3 +1105,23 @@ select
 	, (select e.dep_no from employee e where c.emp_no=e.emp_no)
 from
 	customer c;
+
+
+
+select
+	count(*)
+from
+	(
+	select to_date(to_char(sysdate, 'YYYY-MM')||'-01', 'YYYY-MM-DD')+RNUM-1 "XDAY"
+	from
+	(
+	select rownum RNUM from employee union select rownum+20 from employee)
+	where RNUM<=to_number(to_char(last_day(sysdate),'dd')
+	)
+	)d
+where
+	to_char( d.xday, 'dy', 'nls_date_language = korean')!='토'
+	and to_char( d.xday, 'dy', 'nls_date_language = korean')!='일'
+	and XDAY <= last_day(sysdate)
+
+
