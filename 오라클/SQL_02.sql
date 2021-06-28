@@ -1000,3 +1000,108 @@ select
 from
 	employee;
 
+
+select
+	rownum, emp_no, emp_name, jikup
+from
+	employee
+where
+	rownum<=10
+order by
+    salary desc;
+
+select
+	rownum, dep_no, dep_name, loc
+from
+	dept;
+
+
+select
+	*
+from
+	(select * from employee order by salary desc)
+
+select
+	rownum RNUM, e.*
+from
+	(select * from employee order by salary desc) e
+where
+	rownum<=10
+
+select
+	*
+from
+(
+	select
+		rownum RNUM, e.*
+	from
+		(select * from employee order by salary desc) e
+	where
+		rownum<=10
+)
+where
+	RNUM>=1
+
+
+select * from ( select rownum RNUM, zxcvb.* from (
+
+	select * from customer
+	order by
+		decode(substr(jumin_num,7,1),'1','19','2','19','20')||substr(jumin_num,1,6)asc
+
+) zxcvb where rownum<=10 ) where RNUM>=6;
+
+select * from ( select rownum RNUM, zxcvb.* from (
+
+	select * from employee
+	order by
+		decode(jikup,'사장',1,'부장',2,'과장',3,'대리',4,'주임',5,6) asc
+
+) zxcvb where rownum<=5 ) where RNUM>=2;
+
+
+select count(*) from (
+	select sysdate "XDAY" from dual
+	union select sysdate+1 from dual 	union select sysdate+2 from dual
+	union select sysdate+3 from dual 	union select sysdate+4 from dual
+	union select sysdate+5 from dual 	union select sysdate+6 from dual
+	union select sysdate+7 from dual 	union select sysdate+8 from dual
+	union select sysdate+9 from dual 	union select sysdate+10 from dual
+) d
+where
+	to_char( d.xday, 'dy', 'nls_date_language = korean')!='토'
+	and to_char( d.xday, 'dy', 'nls_date_language = korean')!='일'
+	and to_char( d.xday, 'dy', 'nls_date_language = korean')!='월'
+
+select
+	count(*)
+from
+	(select to_date(to_char(sysdate, 'YYYY-MM')||'-01', 'YYYY-MM-DD')+RNUM-1 "XDAY"
+	from
+	(
+	select rownum RNUM from employee union select rownum+20 from employee)
+	where RNUM<=to_number(to_char(last_day(sysdate).'dd')
+	)
+	)d
+where
+	to_char( d.xday, 'dy', 'nls_date_language = korean')!='토'
+	and to_char( d.xday, 'dy', 'nls_date_language = korean')!='일'
+	and XDAY <= last_day(sysdate)
+
+ select
+	cus_no, cus_name, emp_no
+from
+	customer
+where
+	emp_no in( select emp_no from employee where dep_no=10 )
+
+
+select
+	c.cus_no
+	, c.cus_name
+	, c.tel_num
+	, (select e.emp_name from employee e where c.emp_no=e.emp_no)
+	, (select e.jikup from employee e where c.emp_no=e.emp_no)
+	, (select e.dep_no from employee e where c.emp_no=e.emp_no)
+from
+	customer c;
