@@ -2983,14 +2983,14 @@ insert into employee_vw1 (
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 <14?> 부서별, 직급별로 [부서번호], [부서명], [직급], [평균연봉] 을 출력하는 뷰 employee_vw3를 생성
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
-
+-- order by 원리 물어볼 것
 create view employee_vw3 as 
 	select 
-		d.dep_no "dep_no"
-		, d.dep_name "dep_name"
-		, e.jikup "jikup"
-		, avg(e.salary) "avg_salary"
-	from 
+		d.dep_no 	"dep_no"
+		, d.dep_name 	"dep_name"
+		, e.jikup 		"jikup"
+		, avg(e.salary) 	"avg_salary"
+	from 							
 		employee e,  dept d
 	where 
 		e.dep_no=d.dep_no
@@ -3006,6 +3006,10 @@ create view employee_vw3 as
 무조건 update되는 것은 아니며  원본 테이블에 update되는 상황이어야 한다.
 ------------------------------------------------------------------------------------------------------------
 update 테이블명 set 컬럼명 = 수정데이터, ~ where 조건식
+
+set 컬럼명 - 바꿔야 할 컬럼					]
+= 수정데이터 - 요구되는 데이터				] 이렇게 이해함
+where 조건식 - 바꿔야 할 데이터의 같은 행에 속하는 조건들 	]
 
 update employee_vw1 set jikup = '부장'  where emp_name = '이승엽' and jumin_num = '7811231452719'
 
@@ -3048,7 +3052,7 @@ create view dept_vw1 as
 ------------------------------------------------------------------
 <문> update dept_vw1 set dep_no=70 where dep_no=60;을 실행하면?
 ------------------------------------------------------------------
-▶실패. with check option 이 있으면 where 조건에 위배되는 입력, 수정은 불가능하다.
+▶실패. with check option 이 있으면 where 조건에 위배되는 입력, 수정은 불가능하다. --<중요>
 ▶즉, dept_vw1 란 이름의 view의 목적은 60번 부서를 검색하는 게 목적이므로 이 목적 위배하는 행위는 하지마라
 위배하면 60번 부서를 검색하지 못하게 되니까 위배하지 마라의 의미 있다.
 ------------------------------------------------------------------
@@ -3121,7 +3125,7 @@ CREATE [OR REPLACE] [FORCE | NOFORCE] VIEW 뷰이름 AS select문장 [WITH READ 
 시퀀스 사용하여 pk값을 입력하는 예
 ----------------------------------------------------------------------------------
 	insert into employee( 
-	    emp_no, emp_name, dep_no, jikup, salary, hire_date, jumin_num, phone_num, mgr_emp_no 
+	    emp_no, emp_name, dep_no, jikup, salary, hire_date, jumin_num, phone, mgr_emp_no 
 	)
 	values( 
 	    emp_sq.nextval, '장보고', 40, '대리', 3500, to_date('2012-05-28','YYYY-MM-DD'), '8311091109310', '01092499215', 3 
@@ -3196,6 +3200,7 @@ where
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 <159> employee 테이블에서 평균 연봉 이상의 직원 연봉을 2% 삭감 <평균연봉 서브쿼리(비상관쿼리) 참조>
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+연봉 관련 구문 작성 예시 select avg,min,max 기타 등등(salary) from ~~~ 형식
 update
 	employee
 set
@@ -3514,8 +3519,7 @@ create table employee(
     ,jumin_num     char(13) not null unique
     ,phone         varchar2(15) not null
     ,mgr_emp_no    number(3)   
-    
-    
+        
     ,primary key(emp_no)
     ,foreign key(dep_no) references dept(dep_no)
     ,constraint employee_mgr_emp_no_fk foreign key(mgr_emp_no) references employee(dep_no) - foreign key와 primary key 순서 주의
@@ -3743,3 +3747,8 @@ class BExe {
 	D. Compilation fails because of an error in line 8.
 	E. Compilation fails because of an error in line 14.
 ----------------------------------------------------------------------------------------------
+
+
+
+
+뉴케어 고소한 맛 30개들이 찾아보기
