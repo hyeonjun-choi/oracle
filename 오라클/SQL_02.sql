@@ -1125,3 +1125,18 @@ where
 	and XDAY <= last_day(sysdate)
 
 
+create view employee_vw1 as
+	select
+		emp_no, emp_name, dep_no, jikup, hire_date, jumin_num, phone_num, mgr_emp_no
+	from
+		employee
+
+select * from employee_vw1
+
+
+ update
+	employee
+set
+	salary = salary * 1.05
+where
+ 	emp_no in( select distinct emp_no from customer where emp_no is not null )
