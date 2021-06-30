@@ -3291,25 +3291,163 @@ where 조건절에 계속 false가 되는 조건을 걸면 컬럼명, 자료형,
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 <165> 게시판에 입력되는 데이터를 저장하려면 테이블 구조는 어떻게 설계해야 하는가
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+create table board(
+b_no		number(9)			-> 게시판 글 고유번호
 
-b_no		-> 게시판 글 고유번호
+, subject		varchar2(50)	not null		-> 글 제목
+, writer		varchar2(30)	not null		-> 저자 이름
+, content		varchar2(2000)	not null		-> 글 내용
+, pwd		varchar2(12)	not null		-> 암호 -- 수정 또는 삭제를 위해
+, email		varchar2(30)			-> 이메일
 
-subject		-> 글 제목
-writer		-> 저자 이름
-content		-> 글 내용
-pwd		-> 암호
-email		-> 이메일
+, reg_date		date		default sysdate	-> 등록일	
+, readcount	number(5)	default 0		-> 조회수	-update
 
-reg_date		-> 등록일
-readcount	-> 조회수
+, group_no 	number(9)	not null		-> 게시판 글의 소속 그룹번호.		--정렬 시 사용
+, print_no		number(9)	not null		-> 같은 그룹번호 내에서 화면 출력 순서 번호.	--정렬 시 사용
 
-group_no 	-> 게시판 글의 소속 그룹번호.
-print_no		-> 같은 그룹번호 내에서 화면 출력 순서 번호.
+, print_level	number(9)	not null		-> 같은 그룹번호 내에서 댓글 들여쓰기 레벨 단계 번호--부모 자식 관계 확인 가능
 
-print_level	-> 같은 그룹번호 내에서 댓글 들여쓰기 레벨 단계 번호
+, primary key(b_no)
+)
+------------------------------------------------------------------------------------------------------------------
+<새끼> 정렬에 관련된 컬럼은? 
+	group by, print_no
+	정렬 시
+	먼저 그룹번호를 내림차순으로 정렬하고 
+	같은 그룹번호 내에서 화면 출력 순서를 오름차순으로 정렬할 것이다.
+<새끼> 부모자식 관계를 표현하는데 사용되는 데이터가 있는 컬럼은? 
+	print_level
+	자식은 부모보다 1단계 오른쪽으로 밀려 들어가게 만든다.
 
+■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+<166> 게시판이 오픈된 후 처음으로 누군가 아래처럼 글을 올렸다. insert구문을 쓰면?  <- insert 구문 외워둘 것.
+									 디폴트로 설정된 컬럼은 안쓰는게 낫다
+글제목 => 11월 모두 취업합시다
+글내용 => 어쩌구 어쩌구
+글쓴이 => 회원
+이메일 => hwon@naver.com
+비밀번호 => 1234
+■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+insert into board(
+	b_no
+	, subject
+	, writer
+	, content
+	, pwd
+	. email
+	--, reg_date
+	--, readcount
+	, group_no
+	, print_no
+	, print_level
+)
+values(
+	(select nvl(max(b_no),0)+1 from board)
+	, '11월 모두 취업합시다'
+	, '회원'
+	, '어쩌구 저쩌구'
+	, '1234'
+	, 'hwon@naver.com'
+	--, sysdate
+	--, 0
+	, (select nvl(max(b_no),0)+1 from board)
+	, 0
+	, 0
+)
 
+■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+<167> 누군가 아래처럼 글을 씀. 게시판 번호 1번에 댓글을 아래처럼 올림. 이때 댓글 올리는 과정 중에 발생되는 SQL구문 모두 사용
+글제목 => 맞습니다. 열공합시다
+글내용 => 어쩌구 어쩌구
+글쓴이 => 영민
+이메일 => min@naver.com
+비밀번호 => 2345
+■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+부모글의 조회수를 1 업데이트 하기
+밑으로 내리는 글의 출력순서번호를 1 업데이트 하기
+댓글 입력하기
 
+update board set readcount = readcount + 1 where b_no=1;
+-------------------------------------------------------------------------------------
+update board set print_no=priont_no+1 
+where group_no=b_no가 1번인 글의 그룹번호
+	print_no>b_no가 1번인 글의 출력순서번호
+-------------------------------------------------------------------------------------
+update board set print_no=priont_no+1 
+where group_no=(select group_no from board where b_no=1)	-->b_no가 1번인 글의 그룹번호
+	print_no>(select print_no from board where b_no=1);	-->b_no가 1번인 글의 출력순서번호
+-------------------------------------------------------------------------------------
+insert into board(
+	b_no
+	, subject
+	, writer
+	, content
+	, pwd
+	, email
+	, group_no
+	, print_no
+	, print_level
+)
+values(
+	(select nvl(max(b_no),0)+1 from board)
+	, '맞습니다. 열공합시다'
+	, '영민'
+	, '어쩌구 저쩌구'
+	, '2345'
+	, 'min@naver.com'
+	, (select group_no from board where b_no=1)		--b_no가 1번인글의 그룹번호
+	, (select print_no+1 from board where b_no=1)		--b_no가 1번인글의 출력순서번호에 1 더한거
+	, (select print_level+1 from board where b_no=1)	--b_no가 1번인글의 들여쓰기번호에 1 더한거
+)
+
+■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+<168> 게시판의 모든 글을 출력하라
+---------------------------------------------------	
+출력되는 데이터는 단순역순번호, 제목, 글쓴이, 작성일(년-월-일), 조회수 이다
+------------------------------------------------------------------------------------------------------
+	정렬 기준
+---------------------------------------------------
+		그룹번호 내림차순
+		출력순서번호 오름차순
+---------------------------------------------------
+	print_level 컬럼안의 데이터를 가지고 들여쓰기를 표현하십쇼		
+■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+<lpad활용 출력식>
+
+select
+	x.cnt-rownum+1					"번호", b.*
+from
+(
+	select
+		lpad( ' ', print_level*5, ' ' )||decode(print_no,0,'','ㄴ')||subject 	"글제목"
+		, writer							"글쓴이명"
+		, to_char(reg_date, 'YYYY-MM-DD')				"등록일"
+		, readcount						"조회수"
+	from
+		board 
+	order by 
+		group_no asc, print_no desc;
+) b, (select count(*) CNT from board) x
+
+-------------------------------------------------------------------------------------------------------------
+
+select
+	(select count(*) from employee)-rownum+1	no_desc
+	, rownum					no_asc
+	, e.*
+from
+	employee e
+부하가 많이 걸린다는 단점 존재
+-------------------------------------------------------------------------------------------------------------
+select
+	x.cnt-rownum+1				no_desc
+	, rownum					no_asc
+	, e.*
+from
+	employee e, (select count(*) from employee) x
+
+총 갯수와 직원번호 최대값 매칭이 안될 수 있으므로 cnt로 구해야 함
 
 
 
