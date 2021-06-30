@@ -1728,7 +1728,7 @@ order by
 	s.sal_grade_no asc
 	, decode(e.jikup, '사장', 1, '부장', 2, '과장', 3, '대리', 4, '주임', 5, 6 ) asc; 
 	, case when substr( e.jumin_num,7,1) in ('1', '2') then '19' else '20' end 
-	|| substr(e.jumin_num,1,6)) asc;
+	|| substr(e.jumin_num,1,6) asc;
 ----------------------------------------------------------------------------
 
 --------------------------------------------------------------------------
@@ -1746,7 +1746,7 @@ order by
 	s.sal_grade_no asc
 	, decode(e.jikup, '사장', 1, '부장', 2, '과장', 3, '대리', 4, '주임', 5, 6 ) asc; 
 	, case when substr( e.jumin_num,7,1) in ('1', '2') then '19' else '20' end 
-	|| substr(e.jumin_num,1,6)) asc;
+	|| substr(e.jumin_num,1,6) asc;
 ----------------------------------------------------------------------------
 
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
@@ -3237,38 +3237,46 @@ where
 정렬 기준=>연봉 높은 순서>직급 높은 순서>입사일 빠른 순서>나이 높은 순서
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 update
-	employee
+    employee
 set
-	salary = salary*0.90
+    salary = salary * 0.9
 where
-	emp_no in (
-		select emp_no from ( select rownum RNUM, zxcvb.* from (
-		select emp_no from employee
-		order by
-		salary desc
-		, decode(jikup, '사장', 1, '부장', 2, '과장', 3, '대리', 4, '주임', 5,6) asc
-		, hire_date asc
-		, decode(substr(jumin_num,7,1),'1','19','2','19','20')||substr(jumin_num,1,6) asc
-	) zxcvb where rownum<=5 ) where RNUM>=2;
-)
+    emp_no in (
+        select
+        emp_no
+        from
+        (
+        select
+          rownum RNUM
+          , zxcvb.*
+        from (
+          select emp_no
+          from employee
+          order by
+          salary desc
+          , decode(jikup, '사장', 1, '부장', 2, '과장', 3, '대리', 4, '주임', 5, 6) asc
+          , hire_date asc
+          , decode(substr(jumin_num,7,1),'1','19','2','19','20')||substr(jumin_num,1,6) asc
+        ) zxcvb where rownum <=5 ) where RNUM >= 2
+    );
 -------------------------------------------------------------------------------------------------------------------
-update
+ update
 	employee
 set
-	salary = salary*0.9
+	salary = salary * 0.9
 where
-	emp_no in (
+	emp_no in(
 		select emp_no from ( select rownum RNUM, zxcvb.* from (
-		select emp_no from employee
-		order by
-		salary desc
-		, decode(jikup, '사장', 1, '부장', 2, '과장', 3, '대리', 4, '주임', 5,6) asc
-		, hire_date asc
-		, decode(substr(jumin_num,7,1),'1','19','2','19','20')||substr(jumin_num,1,6) asc
-	) zxcvb where RNUM>=2 and RNUM<=5
-)
 
+			select emp_no from employee
+			order by
+			salary desc
+			, decode(jikup, '사장', 1, '부장', 2, '과장', 3, '대리', 4) asc
+			, hire_date asc
+			, decode(substr(jumin_num,7,1), '1', '19', '2', '19', '20')||substr(jumin_num,1,6) asc
 
+		) zxcvb) where RNUM<=5 and RNUM>=2
+	);        
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 <163> employee와 똑같은 구조와 똑같은 데이터를 가진 쌍둥이 테이블 employee2 만들면?
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
@@ -3416,7 +3424,7 @@ values(
 <lpad활용 출력식>
 
 select
-	x.cnt-rownum+1					"번호", b.*
+	x.cnt-rownum+1							"번호", b.*
 from
 (
 	select
