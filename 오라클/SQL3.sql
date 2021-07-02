@@ -175,3 +175,20 @@ from
     employee e1, employee e2
 where
     e1.mgr_emp_no=e2.emp_no;
+
+-- 연습하기
+
+-- employee 테이블에서 직원번호, 직원명, 입사일(년-월-일(요일) 분기 시분초) 검색
+select
+	emp_no
+	, emp_name
+	, to_char(hire_date,'YYYY-MM-DD Q AM HH:MI:SS'
+	, 'nls_date_language = Korean')
+from
+	employee;
+-- employee 테이블에서 직원번호, 직원명, 입사일(x년-x월-x일(요일) x분기 x시x분x초 ) 검색하라
+-- 1999년-12월-25일(화) 4분기 11시 10분 22초
+
+-- employee 테이블에서 직원번호, 직원명, 근무일수, 근무개월수, 입사후5개월후날짜(년-월-일), 입사한달의 마지막날짜(년-월-일)
+-- 입사한날짜기준돌아오는일요일날짜(년-월-일) 검색
+-- 단, 근무일수는 소수 2자리에서 반올림할것

@@ -945,6 +945,15 @@ select
 from 
 	employee;
 
+select 
+	emp_no
+	, emp_name
+	, to_char(hire_date,'YYYY-MM-DD Q AM HH:MI:SS' 
+	, 'nls_date_language = Korean') 
+from 
+	employee;
+
+
 -------------------------------------------------------------------------------------------
 to_char( 날짜 또는 숫자 컬럼, '출력시 원하는 문자패턴' )
 
@@ -968,7 +977,7 @@ to_char(hire_date, 'YYYY-MM-DD')
 hire_date 컬럼 안의 데이터를 년-월-일 패턴의 문자열로 바꾸어 리턴하라
 
 
-<49-2> employee 테이블에서 직원번호, 직우너명, 입사일(x년-x월-x일(요일) x분기 x시x분x초 ) 검색하라
+<49-2> employee 테이블에서 직원번호, 직원명, 입사일(x년-x월-x일(요일) x분기 x시x분x초 ) 검색하라
 1999년-12월-25일(화) 4분기 11시 10분 22초
 
 select
@@ -3457,8 +3466,24 @@ from
 
 총 갯수와 직원번호 최대값 매칭이 안될 수 있으므로 cnt로 구해야 함
 
-
-
+<번외> 10번 부서 직원들이 관리하는 [고객번호], [고객명], [직원번호] 검색
+----------------------------------------------------------------------------------------
+select
+	c.cus_no, c.cus_name, c.emp_no
+from
+	customer c
+where
+	exists ( select e.emp_no from employee e
+		where e.emp_no = c.emp_no and e.emp_no=10);
+----------------------------------------------------------------------------------------
+select
+	c.cus_no, c.cus_name, c.emp_no
+from
+	customer c
+where
+	exists ( select 1 from employee e
+		where e.emp_no = c.emp_no and e.dep_no=10);
+----------------------------------------------------------------------------------------
 
 
 
