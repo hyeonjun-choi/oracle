@@ -1114,6 +1114,8 @@ dual(가상 혹은 더미 테이블) - 존재되어 있는 테이블이 있지 �
 
 <55> employee 테이블에서 직원번호, 직원명, 현재나이, 입사일 당시나이를 검색해서 출력
 
+현재 나이 구하는 공식 : 현재날짜(sysdate)에서 주민번호를 빼는 방식을 통해 구하는 것이 가능
+
 select
 	emp_no
 	, emp_name
@@ -1127,6 +1129,8 @@ select
 	case substr( jumin_num,7,1) when '1' then'19' when '2' then '19' else '20' end
 	|| substr(jumin_num,1,2))
 	+ 1||'세'
+
+ decode (substr(jumin_num,7,1), '1', '19', '2', '19', '20') || substr(jumin_num,1,2) -- 출생년도
 
 from
 employee;
@@ -1164,6 +1168,7 @@ order by "생일까지 남은 일수" asc;
 생일까지 남은 일수 계산방법
 
 	 만약 올해생일날짜-지금날짜 값이 양수면 생일이 안 지났으므로 올해생일날짜-지금날짜 면 된다.
+		
 	 만약 올해생일날짜-지금날짜 값이 음수면 생일이 지났으므로 내년생일날짜-지금날짜 면 된다.
 	
 <56> employee 테이블에서 직원번호, 직원명, 직급, 연봉(xxx,xxx,xxx만원) 를 검색하면
