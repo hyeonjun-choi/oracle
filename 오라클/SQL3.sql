@@ -1,194 +1,96 @@
-create table board(
-b_no            number(9)                       --> 게시판 글 고유번호
+/*
+데이터베이스  - 검색이 쉽도록 일정한 기준에 맞추어 자료를 분류, 정리해 놓은 '자료의 집합'
+데이터베이스 조건   - 실시간 접근성, 지속적인 변화(=최신의 정보가 정확하게 저장), 동시 공유 등
+                - 포괄적 개념에서 엑셀 등이 데이터베이스라고 부르긴 어렵다.
 
-, subject       varchar2(50)    not null        --> 글 제목
-, writer        varchar2(30)    not null        --> 저자 이름
-, content       varchar2(2000)  not null        --> 글 내용
-, pwd           varchar2(12)    not null        --> 암호 -- 수정 또는 삭제를 위해
-, email         varchar2(30)                    --> 이메일
-
-, reg_date      date            default sysdate --> 등록일
-, readcount     number(5)       default 0       --> 조회수    -update
-
-, group_no      number(9)       not null        --> 게시판 글의 소속 그룹번호.        --정렬 시 사용
-, print_no      number(9)       not null        --> 같은 그룹번호 내에서 화면 출력 순서 번호.    --정렬 시 사용
-
-, print_level   number(9)       not null        --> 같은 그룹번호 내에서 댓글 들여쓰기 레벨 단계 번호--부모 자식 관계 확인 가능
-
-, primary key(b_no)
-)
-
-select * from board;
-
-select
-	x.cnt-rownum+1					"번호", b.*
-from
-(
-	select
-		lpad( ' ', print_level*5, ' ' )||decode(print_no,0,'','ㄴ')||subject 	"글제목"
-		, writer							"글쓴이명"
-		, to_char(reg_date, 'YYYY-MM-DD')				"등록일"
-		, readcount						"조회수"
-	from
-		board
-	order by
-		group_no asc, print_no desc;
-) b, (select count(*) CNT from board) x
-
-commit;
-
-select lpad
+RDBMS 관계형 데이터베이스 관리 시스템?
+- 데이터가 컬럼(column - 열)과 로우(row - 행)로 이루어진 테이블(table)에 저장되며,
+테이블들 사이에 관계가 설정하여 관리하는 시스템
 
 
----
-update
-    employee
-set
-    salary = salary * 0.9
-where
-    emp_no in (
-        select
-        emp_no
-        from
-        (
-        select
-          rownum RNUM
-          , zxcvb.*
-        from (
-          select emp_no
-          from employee
-          order by
-          salary desc
-          , decode(jikup, '사장', 1, '부장', 2, '과장', 3, '대리', 4, '주임', 5, 6) asc
-          , hire_date asc
-          , decode(substr(jumin_num,7,1),'1','19','2','19','20')||substr(jumin_num,1,6) asc
-        ) zxcvb where rownum <=5 ) where RNUM >= 2
-    );
+대략적인 구조
+                   customer                            => 테이블명
+------------------------------------------
+고객번호      고객명        주소       전화번호               =>column 명
+------------------------------------------
+  1         저팔계        서울      02-1234-1234          =>row(행)
+------------------------------------------
+  2         사오정        부산      02-2345-2345          =>row(행)
+------------------------------------------
+  3         손오공        제주      02-3456-3456          =>row(행)
+------------------------------------------
+  ↓           ↓          ↓            ↓
+column      column      column      column
+ (컬럼)       (컬럼)       (컬럼)        (컬럼)
+  (열)        (열)         (열)          (열)
 
 
+SQL -- RDBMS에 접근하여 데이터의 입력, 수정, 삭제, 검색 등의 기능을 가진 RDBMS 관리 언더
+'구조적 언더'
 
-update
-	employee
-set
-	salary = salary * 0.9
-where
-	emp_no in(
-		select emp_no from ( select rownum RNUM, zxcvb.* from (
+SQL 종류
 
-			select emp_no from employee
-			order by
-			salary desc
-			, decode(jikup, '사장', 1, '부장', 2, '과장', 3, '대리', 4) asc
-			, hire_date asc
-			, decode(substr(jumin_num,7,1), '1', '19', '2', '19', '20')||substr(jumin_num,1,6) asc
+<15번부터 예시 문제풀이 통한 복습>
 
-		) zxcvb where rownum<=5 ) where RNUM>=2
-	);
+<>하나의 테이블에서의 모든 컬럼, 행의 데이터를 검색하기 위한 구문
+==
+select 모든 column명 from 테이블
+또는
+select * from 테이블(*사용시 create 구문 그대로 나옴)
 
- update
-	employee
-set
-	salary = salary * 0.9
-where
-	emp_no in(
-		select emp_no from ( select rownum RNUM, zxcvb.* from (
+ex)
+15번 employee 테이블에서 모든 컬럼, 모든 행의 데이터를 검색하면?
 
-			select emp_no from employee
-			order by
-			salary desc
-			, decode(jikup, '사장', 1, '부장', 2, '과장', 3, '대리', 4) asc
-			, hire_date asc
-			, decode(substr(jumin_num,7,1), '1', '19', '2', '19', '20')||substr(jumin_num,1,6) asc
-
-		) zxcvb) where RNUM<=5 and RNUM>=2
-	);
-
-
-select
-	x.cnt-rownum+1					"번호", b.*
-from
-(
-	select
-		lpad( ' ', print_level*5, ' ' )||decode(print_no,0,'','ㄴ')||subject 	"글제목"
-		, writer							                                    "글쓴이명"
-		, to_char(reg_date, 'YYYY-MM-DD')			                        	"등록일"
-		, readcount					                                           	"조회수"
-	from
-		board
-	order by
-		group_no asc, print_no desc;
-) b, (select count(*) CNT from board) x
-
-
-select
-	(select count(*) from employee)-rownum+1	no_desc
-	, rownum					no_asc
-	, e.*
-from
-	employee e
-
-select
-	X.cnt-rownum+1				no_desc
-	, rownum					no_asc
-	, e.*
-from
-	employee e, (select count(*) from employee) X
-
-
-select
-	e.emp_name	"직원명"
-	, e.jikup		"직원직급"
-	, d.dep_name	"소속부서명"
-	, s.sal_grade_no	"연봉등급"
-from
-	employee e, dept d, salary_grade s
-where
-	e.dep_no=d.dep_no and (e.salary>=s.min_salary and e.salary<=s.max_salary)
-order by
-	s.sal_grade_no asc
-	, decode(e.jikup, '사장', 1, '부장', 2, '과장', 3, '대리', 4, '주임', 5, 6 ) asc
-	, case when substr( e.jumin_num,7,1) in ('1', '2') then '19' else '20' end
-	|| substr(e.jumin_num,1,6) asc;
-
-
-select
-	e.emp_name	"직원명"
-	, e.jikup		"직원직급"
-	, d.dep_name	"소속부서명"
-	, s.sal_grade_no	"연봉등급"
-from
-	(dept d inner join employee e on d.dep_no=e.dep_no) inner join
-	salary_grade s on (e.salary between s.min_salary and s.max_salary);
-order by
-	s.sal_grade_no asc
-	, decode(e.jikup, '사장', 1, '부장', 2, '과장', 3, '대리', 4, '주임', 5, 6 ) asc
-	, case when substr( e.jumin_num,7,1) in ('1', '2') then '19' else '20' end
-	|| substr(e.jumin_num,1,6) asc;
-
---<96> 부하직원명, 부하직원직급, 직속상관명, 직속상관직급 출력<조건> 상관이 있는 직원만 포함
-select
-    e1.emp_name
-    , e1.jikup
-    , e2.emp_
-    , e2,jikup
-from
-    employee e1, employee e2
-where
-    e1.mgr_emp_no=e2.emp_no;
-
--- 연습하기
-
--- employee 테이블에서 직원번호, 직원명, 입사일(년-월-일(요일) 분기 시분초) 검색
+select * from employee
 select
 	emp_no
 	, emp_name
-	, to_char(hire_date,'YYYY-MM-DD Q AM HH:MI:SS'
-	, 'nls_date_language = Korean')
+	, dep_no
+	, jikup
+	, salary
+	, hire_date
+	, jumin_num
+	, phone_num
+	, mgr_emp_no
 from
 	employee;
--- employee 테이블에서 직원번호, 직원명, 입사일(x년-x월-x일(요일) x분기 x시x분x초 ) 검색하라
--- 1999년-12월-25일(화) 4분기 11시 10분 22초
 
--- employee 테이블에서 직원번호, 직원명, 근무일수, 근무개월수, 입사후5개월후날짜(년-월-일), 입사한달의 마지막날짜(년-월-일)
--- 입사한날짜기준돌아오는일요일날짜(년-월-일) 검색
--- 단, 근무일수는 소수 2자리에서 반올림할것
+<> 테이블의 검색 결과에 명칭을 추가하는 방법
+
+작성되는 전체 테이블 표에서 컬럼명 옆에 "컬럼명"을 한글로 표기함으로서 별칭(alias)을 추가한다.
+
+<> 검색 결과에 특정 문자를 추가해서 나타내는 방법
+
+넣고자 하는 칼럼 옆에 ||추가 후 싱글코트'블라블라' 같은 방식으로 작성
+
+ex)
+16. employee 테이블에서 emp_no, emp_name, jikup, hire_date을 검색하면서 별칭(= alias), 즉,
+헤더를 붙여 사원번호, 직원명, 직급, 연봉, 입사일로 하고 연봉에 '만원'이란 문자를 붙여 검색
+
+select
+	emp_no		          직원번호  ------------------  테이블에 들어갈 데이터가 아니므로 더블 코트를 사용
+	, emp_name	          "직원 명"  ------------------ 가능하면 무조건 더블코트 사용
+	, jikup		          "직급"    ------------------ as 생략 가능
+	, salary||'만원'		 "연봉"    ------------------ 별칭에 공백 없을시 더블코드 생략 가능
+	, hire_date 	      "입사일"  ------------------ 오라클에서 연결연산자는 +가 아니라 ||이다. 자바와 다름.
+from
+	employee;
+
+<> 테이블에서 특수한 계산식을 써야 하는 경우
+
+계산하고자 하는 number 자료형 컬럼에 산수기호(ex; *)숫자 등을 기입한다
+
+ex)
+
+employee 테이블에서 직원명, 직급, 연봉, 세금, 실수령액을 검색하면? (세금은 연봉의 12%)
+
+select
+    emp_name                "직원명"
+    , jikup                 "직급"
+    , salary                "연봉"
+    , salary*0.12||'만원'    "세금"
+    , salary*0.88||'만원'    "실수령액"
+from
+    employee;
+
+<>테이블에서 직급
