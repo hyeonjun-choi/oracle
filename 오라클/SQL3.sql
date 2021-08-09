@@ -306,6 +306,170 @@ from
     customer;
 
 nvl문구 사용법
-정석 :
+정석 : nvl( to_char(컬럼명),'null값일때 대체할 문자데이터')
+      숫자형 데이터 컬럼일 경우 문자형으로 바꿔주기 위해 to_char를 적용
+
+★nvl2( 컬럼명, null값 아닐때 대체 데이터, null값 일때 대체 데이터 )
+
+-- 컬럼명 안의 데이터가 null이 아니면 null값 아닐때 대체데이터로 출력하고
+null이면 null값일때 대체데이터를 리턴하는 [null 처리 내장함수] 이다.
+
+ex) customer 테이블에서 고객번호, 고객명, 담당직원존재여부 를 출력하면?
+단, 직원번호가 있으면 '있음', 없으면 '없음'으로 표시
+
+select
+    cus_no
+    , cus_name
+    , nvl2(emp_no, '있음', '없음')
+from
+    customer;
+
+<> case ~ end 구문 패턴 설명
+
+<패턴1>
+●case (컬럼명(※일반적으로 원하는 형태의 값을 얻기 위해 substr을 같이 사용하는 경우가 많으며 이때는
+substr다음에 컬럼을 적을 때 괄호를 넣으면 된다))
+	when 데이터1 then 리턴값1
+	when 데이터2 then 리턴값2
+	~
+	else 리턴값n
+end
+
+컬럼명 안의 데이터가 데이터1과 같으면 리턴값1을 리턴
+컬럼명 안의 데이터가 데이터2과 같으면 리턴값2을 리턴
+~
+그 외에는 리턴값n을 리턴하기
+
+<패턴2>
+●case (컬럼명※)
+	when 컬럼명 = 데이터1 then 리턴값1
+	when 컬럼명 = 데이터2 then 리턴값2
+	~
+	else 리턴값n
+end
+
+
+컬럼명 안의 데이터가 데이터1과 같으면 리턴값1을 리턴
+컬럼명 안의 데이터가 데이터2과 같으면 리턴값2을 리턴
+~
+그 외에는 리턴값n을 리턴하기
+
+패턴2 에서 = 대신에 필요에 따라 >=, >, <, <=, != 등의 비교연산자도 사용할 수 있다.
+필요에 따라 else 리턴값n은 생략될 수 있다.
+
+decode(~) 구문의 패턴 설명
+
+decode(
+	※컬럼명  -- decode의 경우 시작부터 괄호를 넣어줘서 substr이 괄호 안에 들어가도록
+	, 비교데이터1, 리턴값1
+	, 비교데이터2, 리턴값2
+	, ~
+	, 리턴값n
+)
+
+
+컬럼명 안의 데이터가 데이터1과 같으면 리턴값1을 리턴
+컬럼명 안의 데이터가 데이터2과 같으면 리턴값2을 리턴
+~
+그 외에는 리턴값n을 리턴하기
+
+
+필요에 따라 그외 경우 리턴값n은 생략될 수 있다.
+
+decode 단점 =
+ 오라클에서밖에 못쓰는 오라클 전용함수. case ~ end 구문은 모든 DB에서 사용가능하다.
+ '같다'라는 조건에서만 사용 가능
+-----------------------------------------------------------------------------------------------------------
+각 자리수마다 무엇이 있는지 알기 어렵기 때문에 사용에 주의해야
+
+case = 모든 데이터베이스에서 사용 가능
+
+case substr(컬럼명, 카피해올 데이터의 시작번호, 갯수) when A then B (else) end
+
+ex) employee 테이블에서 직원번호, 직원명, 직급, <성별> 을 출력하면...
+
+select   -----  when ~ then ~ end형식(너무 길다)
+    emp_no
+    ,emp_name
+    ,jikup
+    ,case
+       substr(jumin_num,7,1)
+       when '1' then '남'
+       when '3' then '남'
+       when '2' then '여'
+       when '4' then '여'
+    end
+from
+    employee
+----------------------------------------------------------------------------------------------------------------------------------
+select  ----- when ~ then ~ else ~ end (when then 처리 후 나머지를 else로)
+	emp_no
+	, emp_name
+	, jikup
+	, case
+		substr(jumin_num,7,1)
+		when '1' then '남'
+		when '3' then '남'
+		else '여'
+	end
+from
+	employee
+----------------------------------------------------------------------------------------------------------------------------------
+ select  -----  when then else end(substr컬럼이 when 뒤로 옴, 부등호 수식 사용)
+	emp_no
+	, emp_name
+	, jikup
+	, case
+		when substr(jumin_num,7,1)='1' then '남'
+		when substr(jumin_num,7,1)='3' then '남'
+		else '여'
+	end
+from
+	employee
+----------------------------------------------------------------------------------------------------------------------------------
+select ----- decode substr컬럼 '','','','',''(end 없음, else 없음, when then 없음)
+	emp_no
+	, emp_name
+	, jikup
+	, decode(
+		substr(jumin_num,7,1),'1','남','3','남','여')
+from
+	employee
+
+ex) employee 테이블에서 직원번호, 직원명, 직급, <출생년도> 출력
+
+select
+	emp_no
+	, emp_name
+	, jikup
+	, case
+		when substr( jumin_num,7,1)='1'then'19'||substr(jumin_num,1,2)
+		when substr( jumin_num,7,1)='2'then'19'||substr(jumin_num,1,2)
+		when substr( jumin_num,7,1)='3'then'20'||substr(jumin_num,1,2)
+		when substr( jumin_num,7,1)='4'then'20'||substr(jumin_num,1,2)
+	end
+from
+	employee;
+-------------------------->>>
+select
+	emp_no
+	, emp_name
+	, jikup
+	, case
+		when substr( jumin_num,7,1)='1'then'19'
+		when substr( jumin_num,7,1)='2'then'19'
+		else '20'
+		end || substr(jumin_num,1,2)
+from
+	employee;
+--------------------------->>>
+select
+	emp_no
+	, emp_name
+	, jikup
+	, decode (substr(jumin_num,7,1),'1','19'||substr(jumin_num,1,2),'2','19'||substr(jumin_num,1,2),'20'||substr(jumin_num,1,2))
+	, decode (substr(jumin_num,7,1), '1', '19', '2', '19', '20') || substr(jumin_num,1,2) <= 실 정답
+from
+	employee;
 
 
