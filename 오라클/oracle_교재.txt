@@ -874,7 +874,7 @@ select
 	, emp_name
 	, jikup
 	, decode (substr(jumin_num,7,1),'1','19'||substr(jumin_num,1,2),'2','19'||substr(jumin_num,1,2),'20'||substr(jumin_num,1,2))
-	, decode (substr(jumin_num,7,1), '1', '19', '2', '19', '20') || substr(jumin_num,1,2) <= 실 정답	
+	, decode (substr(jumin_num,7,1), '1', '19', '2', '19', '20')||substr(jumin_num,1,2) <= 실 정답	
 from
 	employee;
 

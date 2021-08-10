@@ -468,8 +468,151 @@ select
 	, emp_name
 	, jikup
 	, decode (substr(jumin_num,7,1),'1','19'||substr(jumin_num,1,2),'2','19'||substr(jumin_num,1,2),'20'||substr(jumin_num,1,2))
-	, decode (substr(jumin_num,7,1), '1', '19', '2', '19', '20') || substr(jumin_num,1,2) <= 실 정답
+	, decode (substr(jumin_num,7,1),'1','19','2','19','20')||substr(jumin_num,1,2) <= 실제 정답
 from
 	employee;
 
+ex) employee 테이블에서 직원번호, 직원명, 직급, 출생년대(4자리)를 출력
+
+select
+    emp_no
+    , emp_name
+    , jikup
+    , case
+    when substr(jumin_num,7,1)='1'then'19'
+    when substr(jumin_num,7,1)='2'then'19'
+    else '20'
+    end||substr(jumin_num,1,1)||'0년대'
+from
+    employee;
+----------------------------------------------------
+select
+    emp_no
+    , emp_name
+    , jikup
+    , decode(substr(jumin_num,7,1),'1','19','2','19','20')||substr(jumin_num,1,1)||'0년대')
+from
+    employee;
+
+ex) employee 테이블에서 나이순으로 출력(연장자가 먼저 나오도록)
+
+select * from employee order by
+    case
+    when substr(jumin_num,7,1)='1'then'19'
+    when substr(jumin_num,7,1)='2'then'19'
+    else '20'
+    end||substr(jumin_num,1,6)asc;
+
+테이블 명 이후에 order by를 넣고 case when 문구를 넣어 정렬시킨다.(오름차순, 내림차순 정렬 시)
+
+rder by 뒤는 정렬 기준 컬럼이 나온다. 정렬 기준 컬럼을 case가 끌어 안아서 다른 형태로 바꾼 것이다.
+
+order by 구문의 패턴
+
+order by 컬럼명 | 컬럼순서번호 | 컬럼알리아스 [asc] | desc
+
+ex) employee 테이블에서 직급순서대로 정렬하여 모든 컬럼을 보이게
+
+select * from employee order by
+	case jikup
+		when '사장' then 1
+		when '부장' then 2
+		when '과장' then 3
+		when '대리' then 4
+		when '주임' then 5 else 6
+	end
+	asc;
+
+문자형 데이터에 순서를 부여해주기 위해 각 문자 데이터에 숫자를 차례대로 부여해준 후 정렬해준다
+case (문자데이터)컬럼 when '데이터1' then 1 ~~~~~~~~~~~~ end asc/desc;
+
+order by 뒤는 정렬 기준 컬럼이 나온다. 정렬 기준 컬럼을 case가 끌어 안아서 다른 형태로 바꾼 것이다.
+
+정렬 시 사장은 1로 보고, 부장은 2로 보고, 과장은 3으로 보고, 대리는 4로 보고, 주임은 5로 보고 기타는 6으로 보고
+오름차순으로 정렬. 즉, 직급을 정수로 바꿔서 정렬을 한 것이다.
+
+＠asc를 desc로 바꾸면 직급이 낮은 사람이 먼저 나온다
+
+<> 입사일(년-월-일(요일) 분기 시분초) 출력하는 방법
+
+to_char( 날짜 또는 숫자 컬럼, '출력시 원하는 문자패턴' )
+
+문자데이터가 아닌 데이터를 작성자가 원하는 데이터로 전환할 때 필요.
+
+지정한 날짜 또는 숫자를 원하는 출력문자패턴 으로 바꾸어 주는 변환함수의 일종
+주로 출력할기 위해 사용.
+
+YYYY 	=> 년도 4자리
+MM  	=> 월 2자리
+DD   	=> 일 2자리
+AM HH	=> 오전 | 오후 1~12 사이의 시간
+HH24 	=> 0~23 사이의 시간
+MI	=> 0~59 사이의 분
+SI	=> 0~59 사이의 초
+DAY	=> 영문 요일 풀네임
+DY 	=> 영문 요일 요약
+Q 	=> 1~4 사이의 분기
+
+to_char(hire_date, 'YYYY-MM-DD')
+hire_date 컬럼 안의 데이터를 년-월-일 패턴의 문자열로 바꾸어 리턴하라
+
+ex) employee 테이블에서 직원번호, 직원명, 입사일(년-월-일(요일) 분기 시분초) 검색
+
+select
+    emp_no
+    , emp_name
+    , to_char(hire_date,'YYYY-MM-DD Q AM HH:MI:SS'
+    , 'nls_date_language = korean')
+from
+    employee;
+
+select
+	emp_no
+	, emp_name
+	, to_char(hire_date,'YYYY-MM-DD(D(A생략가능)Y) Q<분기> AM<오전. 오후는 PM 또는 HH24> < HH:MI:SS<시분초>'
+	, 'nls_date_language = Korean')
+from
+	employee;
+
+ex) employee 테이블에서 직원번호, 직원명, 입사일(x년-x월-x일(요일) x분기 x시x분x초 ) 검색하라
+1999년-12월-25일(화) 4분기 11시 10분 22초
+
+select
+    emp_no
+	, emp_name
+	, to_char(hire_date,'YYYY')||'년'
+		|| to_char(hire_date, 'MM')||'월'
+		|| to_char(hire_date, 'DD') ||'일'
+		|| to_char(hire_date, '(DY)', 'nls_date_language = Korean')
+		|| to_char(hire_date, 'Q' ) || '분기'
+		|| to_char(hire_date, 'AM HH' ) || '시'
+		|| to_char(hire_date, ' :MI' ) || '분'
+		|| to_char(hire_date, ' :SS' ) || '초'
+from
+	employee;
+------------------------------------------------------------------------------
+select
+	emp_no
+	, emp_name
+	, to_char(hire_date, 'YYYY"년"MM"월"DD"일"(DY) Q"분기" AM HH"시"MI"분"SS"초" ' , 'NLS_DATE_LANGUAGE = KOREAN' )
+from
+	employee;
+
+1> 각자 따로 분류해서 하나하나씩 잡고 연결시켜주거나
+2> 한번에 이어서 완성시켜주는 방법이 있다.
+
+심화) 50) employee 테이블에서 직원번호, 직원명, 나이 검색
+
+select
+    emp_no
+    , emp_name
+    , to_number( to_char( sysdate,'YYYY'))
+    -
+    to_number(
+        (case substr(jumin_num,7,1)when'1'then'19'when'2'then'19'else'20'end||substr(jumin_num,1,2)+1||'세'
+    from
+        employee;
+------------------------------------------------------------------------------------------------------------
+sysdate -- 오늘날 지금 시간
+나이 구하는 방법ㅂ
 
