@@ -728,7 +728,7 @@ from
 null이면 null값일때 대체데이터를 리턴하는 [null 처리 내장함수] 이다. 
 	
 
-<44> employee 테이블에서 직원번호, 직원명, 직급, 성별을 출력하면...
+<44> employee 테이블에서 직원번호, 직원명, 직급, <성별>을 출력하면...
 
 select
 	emp_no
@@ -841,7 +841,7 @@ case = 모든 데이터베이스에서 사용 가능
 case substr(컬럼명, 카피해올 데이터의 시작번호, 갯수) when A then B (else) end
 
 
-<45> employee 테이블에서 직원번호, 직원명, 직급, 출생년도를 출력
+<45> employee 테이블에서 직원번호, 직원명, 직급, <출생년도>를 출력
 
 
 select
@@ -874,11 +874,11 @@ select
 	, emp_name
 	, jikup
 	, decode (substr(jumin_num,7,1),'1','19'||substr(jumin_num,1,2),'2','19'||substr(jumin_num,1,2),'20'||substr(jumin_num,1,2))
-	, decode (substr(jumin_num,7,1), '1', '19', '2', '19', '20')||substr(jumin_num,1,2) <= 실 정답	
+	, decode (substr(jumin_num,7,1), '1', '19', '2', '19', '20') || substr(jumin_num,1,2) <= 실 정답	
 from
 	employee;
 
-<46> employee 테이블에서 직원번호, 직원명, 직급, 출생년대(4자리)를 출력
+<46> employee 테이블에서 직원번호, 직원명, 직급, <출생년대(4자리)>를 출력
 
 select
 	emp_no
@@ -1063,8 +1063,7 @@ select
 	emp_no					
 	, emp_name				
 	,
-	floor(	(
-	to_number( to_char(sysdate, 'YYYY')) 
+	floor(	(to_number( to_char(sysdate, 'YYYY')) 
 	- to_number( case substr( jumin_num,7,1) when '1' then'19' when '2' then '19' else '20' end 
 	|| substr(jumin_num,1,2)
 	)+ 1
