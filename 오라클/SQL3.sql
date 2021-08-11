@@ -667,6 +667,10 @@ to_date -- 날짜로 전환시켜 정수를 더하거나 빼거나, 혹은 날짜끼리 빼기 위해 (날짜
 
 순서대로 1. 100을 더하기 위해 날짜로 바꾸고 2. 'YYYY-MM-DD'화 하기 위해 문자로 바꿈
 
+날짜끼리 빼는 함수 공식
+to_date('큰 날짜', 'YYYYMMDD') - to_date('작은 날짜', 'YYYYMMDD')
+
+
 54) 개강일이 2021년 5월 12일 이고 종강일이 2021년 11월 10일 이다. 몇일 동안 학원 생활
 
 select
@@ -675,3 +679,33 @@ from
     dual;
 
 dual(가상 호은 더미 테이블)
+
+<참고>
+~~ where dep_no = 10 or dep_no = 20;
+~~ where dep_no in(10,20);
+
+<참고>오라클은 날짜에다가 정수를 더하거나 빼면 정수 만큼의 날짜가 더하거나 빼져 날짜 취급된다(전용 함수 없음)
+
+55) employee 테이블에서 직원번호, 직원명, 현재나이, 입사일 당시나이를 검색해서 출력
+
+select
+    emp_no
+    , emp_name
+    , 현재 나이(현재 시간 날짜에서 주민등록번호에서 유추해낸 날짜를 뺀 다음 플러스 1을 하고 '세'를 붙인다)
+    , 입사일 당시 나이(입사일 년도에서 주민들록상 년도를 뺀 이후 동일하게 조치)
+from
+    employee;
+
+---------------------------------------------------------------------------------------
+
+select
+    emp_no
+    , emp_name
+    , to_number(to_char(sysdate,'YYYY')) -
+    to_number(case substr(jumin_num,7,1)when'1'then'19'when'2'then'19'else'20'end
+    ||substr(jumin_num,1,2)+1||'세'
+    , to_number(to_char(hire_date,'YYYY')) -
+    to_number(case substr(jumin_num,7,1)when'1'then'19'when'2'then'19'else'20'end
+    ||substr(jumin_num,1,2)+1||'세'
+from
+    employee;
