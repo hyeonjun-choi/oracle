@@ -709,3 +709,6 @@ select
     ||substr(jumin_num,1,2)+1||'세'
 from
     employee;
+
+참고; decode(substr(jumin_num,7,1),'1','19','2','19','20')||substr(jumin_num,1,2) -- 출생년도 계산
+
